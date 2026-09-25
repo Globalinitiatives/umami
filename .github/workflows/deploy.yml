@@ -58,7 +58,7 @@ jobs:
             -e TWO_FACTOR_ENCRYPTION_KEY="${{ secrets.TWO_FACTOR_ENCRYPTION_KEY }}" \
             gmanalytics:latest
 
-          docker network connect npm_default gmanalytics
+          docker network connect nginxproxymanager_npmnetwork gmanalytics
 
       - name: Health check
         run: |
