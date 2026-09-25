@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   deploy:
-    runs-on: [hercule, umami]
+    runs-on: [grayelement1, gmanalytics]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
