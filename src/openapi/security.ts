@@ -5,8 +5,7 @@ export const securitySchemes = {
     type: 'http' as const,
     scheme: 'bearer',
     bearerFormat: 'JWT',
-    description:
-      description: 'Token returned by POST /api/auth/login, or an API key (`gmanalytics_…`) created under Settings → API keys (self-hosted only).',
+    description: 'Token returned by POST /api/auth/login, or an API key (`gmanalytics_…`) created under Settings → API keys (self-hosted only).',
   },
   shareToken: {
     type: 'apiKey' as const,
