@@ -210,12 +210,57 @@ export async function POST(request: Request) {
       let referrerQuery: string;
       let referrerDomain: string;
 
-      // UTM Params
-      const utmSource = currentUrl.searchParams.get('utm_source');
-      const utmMedium = currentUrl.searchParams.get('utm_medium');
-      const utmCampaign = currentUrl.searchParams.get('utm_campaign');
-      const utmContent = currentUrl.searchParams.get('utm_content');
-      const utmTerm = currentUrl.searchParams.get('utm_term');
+      // UTM Params — case-insensitive extraction from URL (handles utm_source,
+      // UTM_SOURCE, utm_Source, etc.), with fallback to data.utms for custom
+      // track() events that carry UTMs in the payload after navigation away from
+      // the UTM-tagged landing page. The native UTM report reads these columns
+      // from website_event, so both pageviews and custom events need them.
+      function getUtmParam(params: URLSearchParams, key: string): string | undefined {
+        // Try multiple case variants of the key
+        const candidates = [
+          key,
+          key.toLowerCase(),
+          key.charAt(0).toUpperCase() + key.slice(1).toLowerCase(),
+          key.toUpperCase(),
+        ];
+        for (const k of candidates) {
+          const v = params.get(k);
+          if (v) return v;
+        }
+        // Fallback: scan all params for a case-insensitive match
+        const lower = key.toLowerCase();
+        for (const [p, v] of params.entries()) {
+          if (p.toLowerCase() === lower) return v;
+        }
+        return undefined;
+      }
+
+      const urlUtms = {
+        source: getUtmParam(currentUrl.searchParams, 'utm_source'),
+        medium: getUtmParam(currentUrl.searchParams, 'utm_medium'),
+        campaign: getUtmParam(currentUrl.searchParams, 'utm_campaign'),
+        content: getUtmParam(currentUrl.searchParams, 'utm_content'),
+        term: getUtmParam(currentUrl.searchParams, 'utm_term'),
+      };
+
+      const dataUtms = (typeof data === 'object' && data !== null && 'utms' in data)
+        ? (data as { utms?: Record<string, string> }).utms : undefined;
+
+      const utmSource = urlUtms.source || (dataUtms && dataUtms.source);
+      const utmMedium = urlUtms.medium || (dataUtms && dataUtms.medium);
+      const utmCampaign = urlUtms.campaign || (dataUtms && dataUtms.campaign);
+      const utmContent = urlUtms.content || (dataUtms && dataUtms.content);
+      const utmTerm = urlUtms.term || (dataUtms && dataUtms.term);
+
+      // Strip utms from event data before persisting to avoid duplicate
+      // utms.source / utms.medium / utms.campaign columns in the admin UI.
+      // The native utm_source / utm_medium / utm_campaign columns already
+      // capture these values via the urlUtms / dataUtms fallback above.
+      let eventData = data;
+      if (typeof eventData === 'object' && eventData !== null && 'utms' in eventData) {
+        const { utms, ...rest } = eventData as Record<string, unknown>;
+        eventData = rest;
+      }
 
       // Click IDs
       const gclid = currentUrl.searchParams.get('gclid');
@@ -291,15 +336,15 @@ export async function POST(request: Request) {
 
         // Events
         eventName: name,
-        eventData: data,
+        eventData,
         tag,
 
         // UTM
-        utmSource,
-        utmMedium,
-        utmCampaign,
-        utmContent,
-        utmTerm,
+        utmSource: urlUtms.source || (dataUtms && dataUtms.source),
+        utmMedium: urlUtms.medium || (dataUtms && dataUtms.medium),
+        utmCampaign: urlUtms.campaign || (dataUtms && dataUtms.campaign),
+        utmContent: urlUtms.content || (dataUtms && dataUtms.content),
+        utmTerm: urlUtms.term || (dataUtms && dataUtms.term),
 
         // Click IDs
         gclid,
