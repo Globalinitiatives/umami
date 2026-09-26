@@ -257,7 +257,7 @@ type MetricEntry = PerformanceEntry & {
     hostUrl || '__COLLECT_API_HOST__' || currentScript.src.split('/').slice(0, -1).join('/');
   const endpoint = `${host.replace(/\/$/, '')}__COLLECT_API_ENDPOINT__`;
   const screen = `${width}x${height}`;
-  const eventRegex = /data-gmanalytics-event-([\\w-_]+)/;
+  const eventRegex = /data-gmanalytics-event-([\w-_]+)/;
   const eventNameAttribute = `${_data}gmanalytics-event`;
   const delayDuration = 300;
 
