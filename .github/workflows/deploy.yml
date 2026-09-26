@@ -36,11 +36,6 @@ jobs:
       - name: Create isolated network
         run: docker network create gmanalytics_network || true
 
-      - name: Prepare DB data directory
-        run: |
-          mkdir -p /home/hercule/gmanalytics/gmanalytics_db_data
-          chown -R 70:70 /home/hercule/gmanalytics/gmanalytics_db_data
-
       - name: Start PostgreSQL
         run: |
           docker run -d \
@@ -50,7 +45,7 @@ jobs:
             -e POSTGRES_DB=umami \
             -e POSTGRES_USER=umami \
             -e POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}" \
-            -v /home/hercule/gmanalytics/gmanalytics_db_data:/var/lib/postgresql/data \
+            -v gmanalytics_db_data:/var/lib/postgresql/data \
             postgres:15-alpine
 
       - name: Start Umami
