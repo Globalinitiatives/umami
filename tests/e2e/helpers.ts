@@ -40,7 +40,7 @@ export async function loginPage(page: Page, request: APIRequestContext): Promise
   const auth = await loginViaApi(request);
 
   await page.addInitScript(token => {
-    window.localStorage.setItem('umami.auth', JSON.stringify(token));
+    window.localStorage.setItem('gmanalytics.auth', JSON.stringify(token));
   }, auth.token);
 
   return auth;

@@ -25,7 +25,7 @@ describe('recorder config route CORS', () => {
 
     expect(response.status).toBe(204);
     expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');
-    expect(response.headers.get('Access-Control-Allow-Headers')).toContain('x-umami-cache');
+    expect(response.headers.get('Access-Control-Allow-Headers')).toContain('x-gmanalytics-cache');
   });
 
   test('includes CORS headers on config responses', async () => {

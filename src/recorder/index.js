@@ -121,7 +121,7 @@ import { addCustomEvent, record } from 'rrweb';
       body,
       headers: {
         'Content-Type': 'application/json',
-        'x-umami-cache': cache,
+        'x-gmanalytics-cache': cache,
       },
       credentials: 'omit',
     }).catch(() => {});

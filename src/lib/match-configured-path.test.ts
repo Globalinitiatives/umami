@@ -14,5 +14,5 @@ test('matches paths under the configured base path', () => {
 });
 
 test('normalizes leading slashes in configured paths', () => {
-  expect(matchesConfiguredPath('/script.js', '/script.js')).toBe(true);
+  expect(matchesConfiguredPath('/gmanalytics.js', '/gmanalytics.js')).toBe(true);
 });

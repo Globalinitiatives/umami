@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   deploy:
-    runs-on: [hercule, umami]
+    runs-on: [grayelement1, gmanalytics]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -56,6 +56,7 @@ jobs:
             -e DATABASE_URL="postgresql://umami:${{ secrets.POSTGRES_PASSWORD }}@gmanalytics-db:5432/umami" \
             -e APP_SECRET="${{ secrets.APP_SECRET }}" \
             -e TWO_FACTOR_ENCRYPTION_KEY="${{ secrets.TWO_FACTOR_ENCRYPTION_KEY }}" \
+            -e TRACKER_SCRIPT_NAME=gmanalytics.js \
             gmanalytics:latest
 
           docker network connect nginxproxymanager_npmnetwork gmanalytics

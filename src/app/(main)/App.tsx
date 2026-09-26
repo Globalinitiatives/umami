@@ -90,7 +90,7 @@ export function App({ children }) {
         <Script
           async
           data-website-id={process.env.selfTrack}
-          src={`${process.env.basePath || ''}/script.js`}
+          src={`${process.env.basePath || ''}/gmanalytics.js`}
           data-cache="true"
           data-performance="true"
         />

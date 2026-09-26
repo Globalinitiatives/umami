@@ -130,7 +130,7 @@ export async function POST(request: Request) {
     }
 
     // Parse cache token to get session info
-    const cacheHeader = request.headers.get('x-umami-cache');
+    const cacheHeader = request.headers.get('x-gmanalytics-cache');
 
     if (!cacheHeader) {
       return withCorsHeaders(badRequest({ message: 'Missing session token.' }));

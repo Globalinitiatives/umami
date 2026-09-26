@@ -4,7 +4,7 @@ import { Kafka, logLevel, type Producer, type RecordMetadata, type SASLOptions }
 import { serializeError } from 'serialize-error';
 import { KAFKA, KAFKA_PRODUCER } from '@/lib/db';
 
-const log = debug('umami:kafka');
+const log = debug('gmanalytics:kafka');
 const CONNECT_TIMEOUT = 5000;
 const SEND_TIMEOUT = 3000;
 const ACKS = 1;
@@ -58,7 +58,7 @@ function getClient() {
       : {};
 
   const client: Kafka = new Kafka({
-    clientId: 'umami',
+    clientId: 'gmanalytics',
     brokers: brokers,
     connectionTimeout: CONNECT_TIMEOUT,
     logLevel: logLevel.ERROR,

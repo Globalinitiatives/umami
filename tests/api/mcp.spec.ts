@@ -27,7 +27,7 @@ async function rpc(client: ApiClient, method: string, params: Record<string, unk
             _meta: {
               'io.modelcontextprotocol/protocolVersion': '2026-07-28',
               'io.modelcontextprotocol/clientInfo': {
-                name: 'umami-integration-test',
+                name: 'gmanalytics-integration-test',
                 version: '1.0.0',
               },
               'io.modelcontextprotocol/clientCapabilities': {},
@@ -53,7 +53,7 @@ test.describe('MCP API-key authentication', () => {
     api,
     tokens,
   }) => {
-    for (const client of [api, api.bearer('umami_invalid'), api.bearer(tokens.admin)]) {
+    for (const client of [api, api.bearer('gmanalytics_invalid'), api.bearer(tokens.admin)]) {
       const response = await client.with(headers).post('/mcp', {
         jsonrpc: '2.0',
         id: 1,
@@ -73,7 +73,7 @@ test.describe('MCP API-key authentication', () => {
     const initialized = await rpc(apiKey, 'initialize', {
       protocolVersion: '2025-11-25',
       capabilities: {},
-      clientInfo: { name: 'umami-integration-test', version: '1.0.0' },
+      clientInfo: { name: 'gmanalytics-integration-test', version: '1.0.0' },
     });
     expect(initialized.serverInfo.name).toBeTruthy();
     const { tools } = await rpc(apiKey, 'tools/list');

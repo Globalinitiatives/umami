@@ -9,7 +9,7 @@ import { SessionModal } from './SessionModal';
 import { SessionProperties } from './SessionProperties';
 import { SessionsDataTable } from './SessionsDataTable';
 
-const KEY_NAME = 'umami.sessions.tab';
+const KEY_NAME = 'gmanalytics.sessions.tab';
 
 export function SessionsPage({ websiteId }) {
   const [tab, setTab] = useState(getItem(KEY_NAME) || 'activity');

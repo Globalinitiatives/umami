@@ -12,7 +12,7 @@ import { ReplayModal } from './ReplayModal';
 import { ReplaysDataTable } from './ReplaysDataTable';
 import { SavedReplaysDataTable } from './SavedReplaysDataTable';
 
-const KEY_NAME = 'umami.replays.tab';
+const KEY_NAME = 'gmanalytics.replays.tab';
 
 export function ReplaysPage({ websiteId }: { websiteId: string }) {
   const [tab, setTab] = useState(getItem(KEY_NAME) || 'replays');

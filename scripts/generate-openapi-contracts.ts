@@ -51,9 +51,9 @@ for (const [routeSource, contracts] of byRoute) {
 
     const operation = structuredClone(generatedOperation) as Record<string, unknown>;
     delete operation.security;
-    delete operation['x-umami-audience'];
-    delete operation['x-umami-contract'];
-    delete operation['x-umami-source'];
+    delete operation['x-gmanalytics-audience'];
+    delete operation['x-gmanalytics-contract'];
+    delete operation['x-gmanalytics-source'];
 
     if (
       typeof operation.description === 'string' &&

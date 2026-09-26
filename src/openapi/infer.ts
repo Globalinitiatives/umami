@@ -213,7 +213,7 @@ function getOperation(operation: DiscoveredApiOperation): ZodOpenApiOperationObj
     ...(parameters.length ? { parameters } : {}),
     ...(requestBody ? { requestBody } : {}),
     responses: getResponses(operation),
-    'x-umami-source': source,
+    'x-gmanalytics-source': source,
   } as ZodOpenApiOperationObject;
 }
 

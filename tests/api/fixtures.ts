@@ -27,7 +27,7 @@ interface TestFixtures {
   user: ApiClient;
   /** Logged in as the seeded view-only user, who owns nothing. */
   viewer: ApiClient;
-  /** Authenticated with an admin API key (`umami_…`) instead of a session token. */
+  /** Authenticated with an admin API key (`gmanalytics_…`) instead of a session token. */
   apiKey: ApiClient;
   /** Resolves a share slug to a client authenticated with a share token. */
   share: (slug?: string) => Promise<ApiClient>;

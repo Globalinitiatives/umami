@@ -2,8 +2,8 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { authenticateMcpRequest } from '@/lib/mcp/auth';
 import { DELETE, GET, POST } from './route';
 
-vi.mock('@umami/mcp', () => ({
-  createUmamiMcpHttpHandler: () => ({ fetch: vi.fn() }),
+vi.mock('@gmanalytics/mcp', () => ({
+  createGmanalyticsMcpHttpHandler: () => ({ fetch: vi.fn() }),
 }));
 vi.mock('@/lib/mcp/auth', () => ({
   authenticateMcpRequest: vi.fn(),

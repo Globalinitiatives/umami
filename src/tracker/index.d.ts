@@ -4,7 +4,7 @@ export type TrackedProperties = {
    * Hostname of server
    *
    * @description extracted from `window.location.hostname`
-   * @example 'analytics.umami.is'
+   * @example 'analytics.gmanalytics.is'
    */
   hostname?: string;
   /** Distinct ID associated with the current visitor. */
@@ -20,7 +20,7 @@ export type TrackedProperties = {
    * Page referrer
    *
    * @description extracted from `document.referrer`
-   * @example 'https://analytics.umami.is/docs/getting-started'
+   * @example 'https://analytics.gmanalytics.is/docs/getting-started'
    */
   referrer?: string;
   /**
@@ -43,7 +43,7 @@ export type TrackedProperties = {
    * Page url
    *
    * @description normalized from `window.location.href`
-   * @example 'https://analytics.umami.is/docs/getting-started'
+   * @example 'https://analytics.gmanalytics.is/docs/getting-started'
    */
   url?: string;
   /**
@@ -79,13 +79,13 @@ export type PageViewProperties = WithRequired<TrackedProperties, 'website'>;
 export type CustomEventFunction = (
   props: PageViewProperties,
 ) => EventProperties | PageViewProperties;
-export type UmamiTracker = {
+export type GmanalyticsTracker = {
   track: {
     /**
      * Track a page view
      *
      * @example ```
-     * umami.track();
+     * gmanalytics.track();
      * ```
      */
     (): Promise<void>;
@@ -95,7 +95,7 @@ export type UmamiTracker = {
      * NOTE: event names will be truncated past 50 characters
      *
      * @example ```
-     * umami.track('signup-button');
+     * gmanalytics.track('signup-button');
      * ```
      */
     (eventName: string): Promise<void>;
@@ -107,7 +107,7 @@ export type UmamiTracker = {
      * When tracking events, the default properties are included in the payload. This is equivalent to running:
      *
      * ```js
-     * umami.track(props => ({
+     * gmanalytics.track(props => ({
      *   ...props,
      *   name: 'signup-button',
      *   data: {
@@ -118,7 +118,7 @@ export type UmamiTracker = {
      * ```
      *
      * @example ```
-     * umami.track('signup-button', { name: 'newsletter', id: 123 });
+     * gmanalytics.track('signup-button', { name: 'newsletter', id: 123 });
      * ```
      */
     (eventName: string, obj: EventData): Promise<void>;
@@ -126,7 +126,7 @@ export type UmamiTracker = {
      * Tracks a page view with custom properties
      *
      * @example ```
-     * umami.track({ website: 'e676c9b4-11e4-4ef1-a4d7-87001773e9f2', url: '/home', title: 'Home page' });
+     * gmanalytics.track({ website: 'e676c9b4-11e4-4ef1-a4d7-87001773e9f2', url: '/home', title: 'Home page' });
      * ```
      */
     (properties: PageViewProperties): Promise<void>;
@@ -135,7 +135,7 @@ export type UmamiTracker = {
      * If you don't specify any `name` and/or `data`, it will be treated as a page view
      *
      * @example ```
-     * umami.track((props) => ({ ...props, url: path }));
+     * gmanalytics.track((props) => ({ ...props, url: path }));
      * ```
      */
     (eventFunction: CustomEventFunction): Promise<void>;
@@ -145,7 +145,7 @@ export type UmamiTracker = {
      * Identify a visitor with optional associated data.
      *
      * @example ```
-     * umami.identify('user-123', { plan: 'pro' });
+     * gmanalytics.identify('user-123', { plan: 'pro' });
      * ```
      */
     (id: string, data?: EventData): Promise<void>;
@@ -153,7 +153,7 @@ export type UmamiTracker = {
      * Associate data with the current visitor. An `id` string sets the Distinct ID.
      *
      * @example ```
-     * umami.identify({ id: 'user-123', plan: 'pro' });
+     * gmanalytics.identify({ id: 'user-123', plan: 'pro' });
      * ```
      */
     (
@@ -169,6 +169,6 @@ export type UmamiTracker = {
 };
 declare global {
   interface Window {
-    umami: UmamiTracker;
+    gmanalytics: GmanalyticsTracker;
   }
 }

@@ -32,12 +32,12 @@ export function LoginTwoFactorPage() {
 
   // Redirect to the login page when no token
   useEffect(() => {
-    const token = sessionStorage.getItem('umami.partial-token');
+    const token = sessionStorage.getItem('gmanalytics.partial-token');
     if (!token) {
       router.replace('/login');
       return;
     }
-    sessionStorage.removeItem('umami.partial-token');
+    sessionStorage.removeItem('gmanalytics.partial-token');
     partialTokenRef.current = token;
   }, [router]);
 
@@ -92,7 +92,7 @@ export function LoginTwoFactorPage() {
       <Icon size="lg">
         <Logo />
       </Icon>
-      <Heading>umami</Heading>
+      <Heading>GMAnalytics</Heading>
       <Column gap="4" style={{ minWidth: 300 }}>
         <Heading size="xl">{t(labels.twoFactorLogin)}</Heading>
         <Text>{t(messages.twoFactorLoginDescription)}</Text>

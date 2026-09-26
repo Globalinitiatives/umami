@@ -43,7 +43,7 @@ Route paths and HTTP methods are discovered independently from `src/app/api/**/r
 requires all discovered non-OPTIONS operations in the artifact and rejects duplicate contracts,
 duplicate operation IDs, orphaned contracts, and mismatched dynamic path parameters.
 
-New operations are initially marked with `x-umami-contract: inferred` and their source file. The
+New operations are initially marked with `x-gmanalytics-contract: inferred` and their source file. The
 inference layer extracts path parameters, Zod request fields, authentication, typed response bodies,
 response status helpers, and response media types without importing route modules. Running
 `pnpm openapi:contracts` snapshots that behavior into an explicit contract. Curated `contract.ts`

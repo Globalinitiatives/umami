@@ -6,7 +6,7 @@ import typescript from '@rollup/plugin-typescript';
 export default {
   input: 'src/tracker/index.ts',
   output: {
-    file: 'public/script.js',
+    file: 'public/gmanalytics.js',
     format: 'iife',
   },
   plugins: [
