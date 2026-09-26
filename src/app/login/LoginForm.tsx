@@ -25,7 +25,7 @@ export function LoginForm() {
     await mutateAsync(data, {
       onSuccess: async (response: any) => {
         if (response.requiresTwoFactor) {
-          sessionStorage.setItem('umami.partial-token', response.partialToken);
+          sessionStorage.setItem('gmanalytics.partial-token', response.partialToken);
           router.push('/login/two-factor');
           return;
         }
@@ -41,7 +41,7 @@ export function LoginForm() {
       <Icon size="lg">
         <Logo />
       </Icon>
-      <Heading>umami</Heading>
+      <Heading>GMAnalytics</Heading>
       <Form
         onSubmit={handleSubmit}
         error={getErrorMessage(error)}

@@ -6,7 +6,7 @@ export const config = {
   matcher: '/:path*',
 };
 
-const TRACKER_PATH = '/script.js';
+const TRACKER_PATH = '/gmanalytics.js';
 const RECORDER_PATH = '/recorder.js';
 const COLLECT_PATH = '/api/send';
 const LOGIN_PATH = '/login';

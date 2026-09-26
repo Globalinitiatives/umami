@@ -1,7 +1,7 @@
 import { hash } from '@/lib/crypto';
 import { getRandomChars } from '@/lib/generate';
 
-export const API_KEY_PREFIX = 'umami_';
+export const API_KEY_PREFIX = 'gmanalytics_';
 export const API_KEY_LENGTH = 32;
 export const API_KEY_DISPLAY_LENGTH = API_KEY_PREFIX.length + 8;
 export const API_KEY_LAST_USED_INTERVAL = 5 * 60 * 1000;

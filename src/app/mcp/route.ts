@@ -9,7 +9,7 @@ import { createInProcessFetch } from '@/lib/mcp/dispatch';
 
 export const dynamic = 'force-dynamic';
 
-const log = debug('umami:mcp');
+const log = debug('gmanalytics:mcp');
 
 const logger: McpLogger = {
   info: event => log('%j', event),

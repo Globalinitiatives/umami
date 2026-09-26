@@ -13,13 +13,13 @@ export function TestConsolePage({ websiteId }: { websiteId: string }) {
   const { data } = useWebsiteQuery(websiteId);
 
   function handleRunScript() {
-    window.umami.track(props => ({
+    window.gmanalytics.track(props => ({
       ...props,
       url: '/page-view',
       referrer: 'https://www.google.com',
     }));
-    window.umami.track('track-event-no-data');
-    window.umami.track('track-event-with-data', {
+    window.gmanalytics.track('track-event-no-data');
+    window.gmanalytics.track('track-event-with-data', {
       test: 'test-data',
       boolean: true,
       booleanError: 'true',
@@ -40,32 +40,32 @@ export function TestConsolePage({ websiteId }: { websiteId: string }) {
   }
 
   function handleRunRevenue() {
-    window.umami.track(props => ({
+    window.gmanalytics.track(props => ({
       ...props,
       url: '/checkout-cart',
       referrer: 'https://www.google.com',
     }));
-    window.umami.track('checkout-cart', {
+    window.gmanalytics.track('checkout-cart', {
       revenue: parseFloat((Math.random() * 1000).toFixed(2)),
       currency: 'USD',
     });
-    window.umami.track('affiliate-link', {
+    window.gmanalytics.track('affiliate-link', {
       revenue: parseFloat((Math.random() * 1000).toFixed(2)),
       currency: 'USD',
     });
-    window.umami.track('promotion-link', {
+    window.gmanalytics.track('promotion-link', {
       revenue: parseFloat((Math.random() * 1000).toFixed(2)),
       currency: 'USD',
     });
-    window.umami.track('checkout-cart', {
+    window.gmanalytics.track('checkout-cart', {
       revenue: parseFloat((Math.random() * 1000).toFixed(2)),
       currency: 'EUR',
     });
-    window.umami.track('promotion-link', {
+    window.gmanalytics.track('promotion-link', {
       revenue: parseFloat((Math.random() * 1000).toFixed(2)),
       currency: 'EUR',
     });
-    window.umami.track('affiliate-link', {
+    window.gmanalytics.track('affiliate-link', {
       item1: {
         productIdentity: 'ABC424',
         revenue: parseFloat((Math.random() * 10000).toFixed(2)),
@@ -80,7 +80,7 @@ export function TestConsolePage({ websiteId }: { websiteId: string }) {
   }
 
   function handleRunIdentify() {
-    window.umami.identify({
+    window.gmanalytics.identify({
       userId: 123,
       name: 'brian',
       number: Math.random() * 100,
@@ -113,7 +113,7 @@ export function TestConsolePage({ websiteId }: { websiteId: string }) {
         <Script
           async
           data-website-id={websiteId}
-          src={`${process.env.basePath || ''}/script.js`}
+          src={`${process.env.basePath || ''}/gmanalytics.js`}
           data-cache="true"
           data-performance="true"
         />
@@ -133,14 +133,14 @@ export function TestConsolePage({ websiteId }: { websiteId: string }) {
                 <Link href={`/console/${websiteId}?page=2 `}>page two</Link>
               </div>
               <div>
-                <a href="https://www.google.com" data-umami-event="external-link-direct">
+                <a href="https://www.google.com" data-gmanalytics-event="external-link-direct">
                   external link (direct)
                 </a>
               </div>
               <div>
                 <a
                   href="https://www.google.com"
-                  data-umami-event="external-link-tab"
+                  data-gmanalytics-event="external-link-tab"
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -150,40 +150,40 @@ export function TestConsolePage({ websiteId }: { websiteId: string }) {
             </Column>
             <Column gap>
               <Heading>Click events</Heading>
-              <Button id="send-event-button" data-umami-event="button-click" variant="primary">
+              <Button id="send-event-button" data-gmanalytics-event="button-click" variant="primary">
                 Send event
               </Button>
               <Button
                 id="send-event-data-button"
-                data-umami-event="button-click"
-                data-umami-event-name="bob"
-                data-umami-event-id="123"
+                data-gmanalytics-event="button-click"
+                data-gmanalytics-event-name="bob"
+                data-gmanalytics-event-id="123"
                 variant="primary"
               >
                 Send event with data
               </Button>
               <Button
                 id="generate-revenue-button"
-                data-umami-event="checkout-cart"
-                data-umami-event-revenue={(Math.random() * 10000).toFixed(2).toString()}
-                data-umami-event-currency="USD"
+                data-gmanalytics-event="checkout-cart"
+                data-gmanalytics-event-revenue={(Math.random() * 10000).toFixed(2).toString()}
+                data-gmanalytics-event-currency="USD"
                 variant="primary"
               >
                 Generate revenue data
               </Button>
               <Button
                 id="button-with-div-button"
-                data-umami-event="button-click"
-                data-umami-event-name={'bob'}
-                data-umami-event-id="123"
+                data-gmanalytics-event="button-click"
+                data-gmanalytics-event-name={'bob'}
+                data-gmanalytics-event-id="123"
                 variant="primary"
               >
                 <div>Button with div</div>
               </Button>
-              <div data-umami-event="div-click">DIV with attribute</div>
-              <div data-umami-event="div-click-one">
-                <div data-umami-event="div-click-two">
-                  <div data-umami-event="div-click-three">Nested DIV</div>
+              <div data-gmanalytics-event="div-click">DIV with attribute</div>
+              <div data-gmanalytics-event="div-click-one">
+                <div data-gmanalytics-event="div-click-two">
+                  <div data-gmanalytics-event="div-click-three">Nested DIV</div>
                 </div>
               </div>
             </Column>

@@ -90,9 +90,9 @@ export async function buildOpenApiDocument(
       ...contract.operation,
       ...operationDescriptions[getOperationKey(contract)],
       security: getSecurityRequirements(contract.auth),
-      'x-umami-audience': contract.audience,
-      'x-umami-contract': contract.origin,
-      'x-umami-source': contract.source,
+      'x-gmanalytics-audience': contract.audience,
+      'x-gmanalytics-contract': contract.origin,
+      'x-gmanalytics-source': contract.source,
     };
 
     Object.assign(pathItem, { [contract.method]: operation });
@@ -105,7 +105,7 @@ export async function buildOpenApiDocument(
         title: 'Umami API',
         version,
         description:
-          'REST API for Umami analytics. Every App Router API operation is included. Operations marked with x-umami-contract: inferred are generated from handler source; colocated explicit contracts provide curated descriptions and exact response models. Self-hosted deployments serve these paths beneath their configured BASE_PATH.',
+          'REST API for GMAnalytics analytics. Every App Router API operation is included. Operations marked with x-gmanalytics-contract: inferred are generated from handler source; colocated explicit contracts provide curated descriptions and exact response models. Self-hosted deployments serve these paths beneath their configured BASE_PATH.',
         license: {
           name: 'MIT',
           identifier: 'MIT',

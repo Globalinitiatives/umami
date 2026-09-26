@@ -37,9 +37,9 @@ export const ENTITY_TYPE = {
   board: 4,
 } as const;
 
-export const SHARE_TOKEN_HEADER = 'x-umami-share-token';
-export const SHARE_CONTEXT_HEADER = 'x-umami-share-context';
-export const CACHE_HEADER = 'x-umami-cache';
+export const SHARE_TOKEN_HEADER = 'x-gmanalytics-share-token';
+export const SHARE_CONTEXT_HEADER = 'x-gmanalytics-share-context';
+export const CACHE_HEADER = 'x-gmanalytics-cache';
 
 /** A syntactically valid v4 UUID that never exists in the database. */
 export const UNKNOWN_UUID = '00000000-0000-4000-8000-000000000000';

@@ -10,7 +10,7 @@ afterEach(() => {
 
 test('identifies data-distinct-id before the initial page view', async () => {
   const script = document.createElement('script');
-  script.src = 'https://analytics.example.com/script.js';
+  script.src = 'https://analytics.example.com/gmanalytics.js';
   script.dataset.websiteId = 'website-id';
   script.dataset.distinctId = 'visitor-id';
 

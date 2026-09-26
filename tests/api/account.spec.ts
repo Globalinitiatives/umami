@@ -36,7 +36,7 @@ test.describe('Account', () => {
 
   test('GET /api/me requires authentication', async ({ api }) => {
     const anonymous = await api.get('/api/me');
-    const garbage = await api.bearer('umami_not_a_real_key').get('/api/me');
+    const garbage = await api.bearer('gmanalytics_not_a_real_key').get('/api/me');
 
     expect(anonymous.status).toBe(401);
     expect(garbage.status).toBe(401);
@@ -65,8 +65,7 @@ test.describe('Account', () => {
         name,
         keyPrefix: expect.any(String),
         createdAt: expect.any(String),
-        key: expect.stringMatching(/^umami_/),
-      });
+        key: expect.stringMatching(/^gmanalytics_/),\n      });
       expect(response.body.key.startsWith(response.body.keyPrefix)).toBe(true);
       expect(response.body).not.toHaveProperty('keyHash');
 

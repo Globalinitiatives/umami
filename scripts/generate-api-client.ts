@@ -42,7 +42,7 @@ interface OpenApiOperation {
   tags?: string[];
   parameters?: OpenApiParameter[];
   requestBody?: { required?: boolean };
-  'x-umami-audience'?: string;
+  'x-gmanalytics-audience'?: string;
 }
 
 interface OpenApiDocument {
@@ -79,7 +79,7 @@ function collectOperations(document: OpenApiDocument): OperationDefinition[] {
       }
 
       const key = `${method.toUpperCase()} ${route}`;
-      const audience = operation['x-umami-audience'] ?? 'public';
+      const audience = operation['x-gmanalytics-audience'] ?? 'public';
 
       if (!INCLUDED_AUDIENCES.has(audience)) {
         continue;

@@ -6,7 +6,7 @@ import path from 'node:path';
 const endPoint = process.env.COLLECT_API_ENDPOINT;
 
 if (endPoint) {
-  const file = path.resolve(process.cwd(), 'public/script.js');
+  const file = path.resolve(process.cwd(), 'public/gmanalytics.js');
 
   const tracker = fs.readFileSync(file);
 

@@ -6,18 +6,18 @@ export const securitySchemes = {
     scheme: 'bearer',
     bearerFormat: 'JWT',
     description:
-      'Token returned by POST /api/auth/login, or an API key (`umami_…`) created under Settings → API keys (self-hosted only).',
+      description: 'Token returned by POST /api/auth/login, or an API key (`gmanalytics_…`) created under Settings → API keys (self-hosted only).',
   },
   shareToken: {
     type: 'apiKey' as const,
     in: 'header' as const,
-    name: 'x-umami-share-token',
+    name: 'x-gmanalytics-share-token',
     description: 'Signed token returned by a share endpoint.',
   },
   shareContext: {
     type: 'apiKey' as const,
     in: 'header' as const,
-    name: 'x-umami-share-context',
+    name: 'x-gmanalytics-share-context',
     description: 'Required context header when authenticating with a share token.',
   },
 };

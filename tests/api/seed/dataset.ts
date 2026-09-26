@@ -19,7 +19,7 @@ export interface RecordPayload {
   payload: Record<string, unknown>;
 }
 
-/** Events sent sequentially, chained with the `x-umami-cache` token. */
+/** Events sent sequentially, chained with the `x-gmanalytics-cache` token. */
 export interface Visit {
   events: SendPayload[];
 }

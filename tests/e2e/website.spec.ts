@@ -43,7 +43,7 @@ test.describe('Website tests', () => {
     );
 
     await page.getByText(/Tracking code/i).click();
-    await expect(page.locator('textarea')).toContainText('/script.js');
+    await expect(page.locator('textarea')).toContainText('/gmanalytics.js');
 
     await page.getByText(/Details/i).click();
     const websiteId = await page.getByTestId('text-field-websiteId').locator('input').inputValue();

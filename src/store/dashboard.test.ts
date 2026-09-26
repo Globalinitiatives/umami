@@ -26,7 +26,7 @@ describe('saveDashboard', () => {
   test('persists the resulting state to storage', () => {
     saveDashboard({ editing: true });
 
-    const stored = JSON.parse(localStorage.getItem('umami.dashboard') as string);
+    const stored = JSON.parse(localStorage.getItem('gmanalytics.dashboard') as string);
     expect(stored.editing).toBe(true);
   });
 });

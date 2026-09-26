@@ -12,7 +12,7 @@ export interface ApiOperation {
   method: string;
   /** OpenAPI path template, e.g. "/api/websites/{websiteId}" */
   path: string;
-  /** Route file that implements the operation (x-umami-source) */
+  /** Route file that implements the operation (x-gmanalytics-source) */
   source: string;
   tag: string;
 }
@@ -50,7 +50,7 @@ export function loadOperations(): ApiOperation[] {
         key: `${method.toUpperCase()} ${pathTemplate}`,
         method: method.toUpperCase(),
         path: pathTemplate,
-        source: operation['x-umami-source'] ?? '',
+        source: operation['x-gmanalytics-source'] ?? '',
         tag: operation.tags?.[0] ?? 'Other',
       });
     }

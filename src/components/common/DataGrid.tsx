@@ -27,7 +27,7 @@ import { getItem, setItem } from '@/lib/storage';
 import type { PageResult } from '@/lib/types';
 
 const DEFAULT_SEARCH_DELAY = 600;
-const DISPLAY_MODE_STORAGE_KEY = 'umami.datagrid.displayMode';
+const DISPLAY_MODE_STORAGE_KEY = 'gmanalytics.datagrid.displayMode';
 
 type DisplayMode = 'table' | 'cards';
 
