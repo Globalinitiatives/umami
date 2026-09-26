@@ -267,7 +267,7 @@ export async function POST(request: Request) {
         const utmRecord = typeof utms === 'object' && utms !== null ? utms as Record<string, unknown> : {};
         eventData = {
           ...rest,
-          source: utmRecord.source ?? rest.source,
+          source: utmRecord.source,
           medium: utmRecord.medium ?? rest.medium,
           campaign: utmRecord.campaign ?? rest.campaign,
         } as Record<string, unknown>;
