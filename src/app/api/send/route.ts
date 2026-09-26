@@ -268,8 +268,8 @@ export async function POST(request: Request) {
         eventData = {
           ...rest,
           source: utmRecord.source ?? rest.source,
-          medium: utmRecord.medium ?? rest.source,
-          campaign: utmRecord.campaign ?? rest.source,
+          medium: utmRecord.medium,
+          campaign: utmRecord.campaign,
         } as Record<string, unknown>;
       }
 
