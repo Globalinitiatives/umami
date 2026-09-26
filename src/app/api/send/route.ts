@@ -259,7 +259,18 @@ export async function POST(request: Request) {
       let eventData = data;
       if (typeof eventData === 'object' && eventData !== null && 'utms' in eventData) {
         const { utms, ...rest } = eventData as Record<string, unknown>;
-        eventData = rest;
+        // When UTM data is present, promote UTM values to source/medium/campaign
+        // in the event properties. This ensures the events UI shows the campaign
+        // attribution (e.g. "mytest") rather than the page path (data.source).
+        // The native utm_source column already captures this — this keeps the
+        // event property and the UTM column consistent.
+        const utmRecord = typeof utms === 'object' && utms !== null ? utms as Record<string, unknown> : {};
+        eventData = {
+          ...rest,
+          source: utmRecord.source ?? rest.source,
+          medium: utmRecord.medium ?? rest.medium,
+          campaign: utmRecord.campaign ?? rest.campaign,
+        } as Record<string, unknown>;
       }
 
       // Click IDs
