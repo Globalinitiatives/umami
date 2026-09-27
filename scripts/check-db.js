@@ -8,6 +8,15 @@ import { PrismaClient } from '../generated/prisma/client.js';
 const MIN_VERSION = '9.4.0';
 const MIN_VERSION_NUM = 90400;
 
+// Startup readiness. The app and database containers start concurrently, so
+// PostgreSQL may still be initializing the first time we run. A plain connect
+// is not enough: Postgres accepts TCP connections while starting up, then
+// refuses queries with SQLSTATE 57P03 ("the database system is starting up").
+// Poll until it can actually serve a query so we never report a transient
+// startup condition as a hard failure.
+const READY_ATTEMPTS = Number(process.env.DB_READY_ATTEMPTS || 15);
+const READY_DELAY_MS = Number(process.env.DB_READY_DELAY_MS || 2000);
+
 if (process.env.SKIP_DB_CHECK) {
   console.log('Skipping database check.');
   process.exit(0);
@@ -28,6 +37,32 @@ function success(msg) {
 
 function error(msg) {
   console.log(chalk.redBright(`✗ ${msg}`));
+}
+
+function warn(msg) {
+  console.log(chalk.yellowBright(`! ${msg}`));
+}
+
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+async function waitForDatabase() {
+  for (let attempt = 1; attempt <= READY_ATTEMPTS; attempt++) {
+    try {
+      // A trivial query, not just $connect — this is what distinguishes "socket
+      // open" from "Postgres is actually serving queries".
+      await prisma.$queryRaw`select 1`;
+      success('Database is ready.');
+      return;
+    } catch (e) {
+      if (attempt === READY_ATTEMPTS) {
+        // Out of attempts. Report why and let the normal checks below produce
+        // the real error rather than swallowing it.
+        warn(`Database not ready after ${attempt} attempts: ${e.message}`);
+        return;
+      }
+      await sleep(READY_DELAY_MS);
+    }
+  }
 }
 
 async function checkEnv() {
@@ -84,7 +119,7 @@ async function applyMigration() {
 
 (async () => {
   let err = false;
-  for (const fn of [checkEnv, checkConnection, checkDatabaseVersion, applyMigration]) {
+  for (const fn of [checkEnv, waitForDatabase, checkConnection, checkDatabaseVersion, applyMigration]) {
     try {
       await fn();
     } catch (e) {
