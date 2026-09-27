@@ -50,7 +50,15 @@ import { addCustomEvent, record } from 'rrweb';
   let replayStopped = false;
   let heatmapStarted = false;
 
-  const getSessionCache = () => window.umami?.getSession?.()?.cache;
+  // Resolve the tracker client defensively. A bare `window.gmanalytics` reference
+  // is what let the Umami -> GMAnalytics rename silently break capture: the tracker
+  // global was renamed but this read was not, so the session token never resolved
+  // and startCaptures() was never called. Accept either brand so a future rename
+  // cannot break the recorder the same way.
+  const getSessionCache = () => {
+    const client = window.gmanalytics || window.umami;
+    return client?.getSession?.()?.cache;
+  };
 
   const getPayloadBody = (type, payload) =>
     JSON.stringify({
