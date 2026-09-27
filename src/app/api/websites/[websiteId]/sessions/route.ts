@@ -1,6 +1,6 @@
 import { getQueryFilters, parseRequest } from '@/lib/request';
 import { json, unauthorized } from '@/lib/response';
-import { filterParams, pagingParams, searchParams, withDateRange } from '@/lib/schema';
+import { filterParams, pagingParams, searchParams, sortingParams, withDateRange } from '@/lib/schema';
 import { canViewWebsiteSection } from '@/permissions';
 import { getWebsiteSessions } from '@/queries/sql';
 
@@ -12,6 +12,7 @@ export async function GET(
     ...filterParams,
     ...pagingParams,
     ...searchParams,
+    ...sortingParams,
   });
 
   const { auth, query, error } = await parseRequest(request, schema);
