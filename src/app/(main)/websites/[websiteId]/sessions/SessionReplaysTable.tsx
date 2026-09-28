@@ -1,6 +1,7 @@
 import { Button, DataColumn, DataTable, type DataTableProps, Icon } from '@umami/react-zen';
 import { Play } from 'lucide-react';
 import { DateDistance } from '@/components/common/DateDistance';
+import { SortableLabel } from '@/components/common/SortableLabel';
 import { useMessages } from '@/components/hooks';
 
 function formatDuration(ms: number) {
@@ -32,11 +33,29 @@ export function SessionReplaysTable({
         )}
       </DataColumn>
       <DataColumn id="id" label={t(labels.replayId)} />
-      <DataColumn id="duration" label={t(labels.duration)} width="100px">
+      <DataColumn
+        id="duration"
+        label={
+          <SortableLabel label={t(labels.duration)} sortKey="duration" defaultDirection="desc" />
+        }
+        width="100px"
+      >
         {(row: any) => formatDuration(row.duration || 0)}
       </DataColumn>
-      <DataColumn id="eventCount" label={t(labels.actions)} width="80px" />
-      <DataColumn id="createdAt" label={t(labels.recorded)} width="160px">
+      <DataColumn
+        id="eventCount"
+        label={
+          <SortableLabel label={t(labels.actions)} sortKey="eventCount" defaultDirection="desc" />
+        }
+        width="80px"
+      />
+      <DataColumn
+        id="createdAt"
+        label={
+          <SortableLabel label={t(labels.recorded)} sortKey="createdAt" defaultDirection="desc" />
+        }
+        width="160px"
+      >
         {(row: any) => <DateDistance date={new Date(row.createdAt)} />}
       </DataColumn>
     </DataTable>
