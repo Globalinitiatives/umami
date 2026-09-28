@@ -5,6 +5,7 @@ import {
   pagingParams,
   replayParams,
   searchParams,
+  sortingParams,
   withDateRange,
 } from '@/lib/schema';
 import { canViewAuthenticatedWebsite } from '@/permissions';
@@ -19,6 +20,7 @@ export async function GET(
     ...replayParams,
     ...pagingParams,
     ...searchParams,
+    ...sortingParams,
   });
 
   const { auth, query, error } = await parseRequest(request, schema);
