@@ -42,8 +42,8 @@ const POSTGRES_SORT_COLUMNS: Record<SessionSortKey, string> = {
 
 /**
  * Maps a client-supplied `orderBy` to a safe SQL expression.
- * Returns undefined for unknown keys, which makes pagedRawQuery fall back to
- * its `defaultOrderBy` instead of interpolating the raw value.
+ * Returns undefined for unknown keys, so the caller falls back to its default
+ * ordering rather than interpolating the raw value into SQL.
  *
  * Uses Object.hasOwn rather than `in` so inherited Object.prototype keys
  * (`__proto__`, `constructor`, `toString`) are rejected too — `in` walks the
@@ -82,9 +82,20 @@ async function relationalQuery(websiteId: string, filters: QueryFilters) {
            or device ilike {{search}})`
     : '';
 
-  // orderBy comes from the query string; resolve it through the allowlist before
-  // it is interpolated into SQL by pagedRawQuery.
+  // pagedRawQuery reads filters.orderBy itself and interpolates it straight into
+  // SQL, so the raw value must not reach it. Resolve the client key through the
+  // allowlist, then pass the sanitized filters down and hand the resolved SQL
+  // expression over as the ordering source.
   const orderBy = resolveSessionOrderBy(filters.orderBy);
+
+  const pagingFilters = { ...filters, orderBy: undefined };
+
+  // pagedRawQuery only appends the sort direction to its `orderBy` branch, never
+  // to `defaultOrderBy`, so the direction has to be baked into the clause here.
+  const direction = filters.sortDescending ? 'desc' : 'asc';
+  const orderClause = orderBy
+    ? `${orderBy} ${direction}`
+    : 'max(website_event.created_at) desc, session.session_id';
 
   return pagedRawQuery(
     `
@@ -129,9 +140,9 @@ async function relationalQuery(websiteId: string, filters: QueryFilters) {
       session.city
     `,
     queryParams,
-    filters,
+    pagingFilters,
     FUNCTION_NAME,
-    orderBy || 'max(website_event.created_at) desc, session.session_id',
+    orderClause,
   );
 }
 
@@ -160,9 +171,9 @@ async function clickhouseQuery(websiteId: string, filters: QueryFilters) {
     'website_event.referrer_domain != website_event.hostname',
   );
 
-  // orderBy comes from the query string; resolve it through the allowlist before
-  // it is interpolated into SQL by pagedRawQuery. The two branches below
-  // aggregate from different tables, so each supplies its own expression set.
+  // See the note in relationalQuery: pagedRawQuery reads filters.orderBy itself,
+  // so the sanitized filters are what get passed down, not the raw ones. The two
+  // branches below aggregate from different tables, so each supplies its own set.
   const orderBy = resolveSessionOrderBy(filters.orderBy, {
     visits: `uniq(visit_id)`,
     views: `sumIf(1, event_type = ${EVENT_TYPE.pageView})`,
@@ -174,6 +185,8 @@ async function clickhouseQuery(websiteId: string, filters: QueryFilters) {
     os: `argMax(os, created_at)`,
     device: `argMax(device, created_at)`,
   });
+
+  const pagingFilters = { ...filters, orderBy: undefined };
 
   // The pre-aggregated branch reads min_time/max_time instead of created_at,
   // so its ordering expressions differ from the raw-event branch above.
@@ -188,9 +201,9 @@ async function clickhouseQuery(websiteId: string, filters: QueryFilters) {
     os: `argMax(os, max_time)`,
     device: `argMax(device, max_time)`,
   });
-
+  const direction = filters.sortDescending ? 'desc' : 'asc';
   let sql = '';
-  let defaultOrderBy: string | undefined;
+  let orderClause: string;
 
   if (EVENT_COLUMNS.some(item => Object.keys(filters).includes(item))) {
     sql = `
@@ -222,7 +235,7 @@ async function clickhouseQuery(websiteId: string, filters: QueryFilters) {
     ${searchQuery}
     group by session_id
     `;
-    defaultOrderBy = orderBy || 'lastAt desc, id';
+    orderClause = orderBy ? `${orderBy} ${direction}` : 'lastAt desc, id';
   } else {
     sql = `
     select
@@ -253,8 +266,16 @@ async function clickhouseQuery(websiteId: string, filters: QueryFilters) {
     ${searchQuery}
     group by session_id
     `;
-    defaultOrderBy = orderByStats || 'lastAt desc, id';
+    orderClause = orderByStats ? `${orderByStats} ${direction}` : 'lastAt desc, id';
   }
 
-  return pagedRawQuery(sql, queryParams, filters, FUNCTION_NAME, defaultOrderBy);
+  // ClickHouse's pagedRawQuery has no defaultOrderBy parameter, so the resolved
+  // expression has to arrive as the ordering itself. Rebuild the statement here
+  // rather than relying on a fallback the helper does not support.
+  return pagedRawQuery(
+    `${sql}\norder by ${orderClause}`,
+    queryParams,
+    pagingFilters,
+    FUNCTION_NAME,
+  );
 }
