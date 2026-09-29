@@ -11,6 +11,7 @@ import { getItem, setItem } from '@/lib/storage';
 import { ReplayModal } from './ReplayModal';
 import { ReplaysDataTable } from './ReplaysDataTable';
 import { SavedReplaysDataTable } from './SavedReplaysDataTable';
+import { SharedReplaysDataTable } from './SharedReplaysDataTable';
 
 const KEY_NAME = 'gmanalytics.replays.tab';
 
@@ -58,12 +59,16 @@ export function ReplaysPage({ websiteId }: { websiteId: string }) {
           <TabList>
             <Tab id="replays">{t(labels.replays)}</Tab>
             <Tab id="saved">{t(labels.saved)}</Tab>
+            <Tab id="shared">{t(labels.shared)}</Tab>
           </TabList>
           <TabPanel id="replays">
             <ReplaysDataTable websiteId={websiteId} />
           </TabPanel>
           <TabPanel id="saved">
             <SavedReplaysDataTable websiteId={websiteId} />
+          </TabPanel>
+          <TabPanel id="shared">
+            <SharedReplaysDataTable websiteId={websiteId} />
           </TabPanel>
         </Tabs>
       </Panel>

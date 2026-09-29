@@ -7,6 +7,7 @@ export * from './report';
 export * from './segment';
 export * from './session';
 export * from './sessionReplay';
+export * from './sessionReplayShared';
 export * from './share';
 export * from './team';
 export * from './teamUser';

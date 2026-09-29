@@ -1,7 +1,7 @@
 import { restoreReplayEventFragments } from '@/lib/replay';
 import { parseRequest } from '@/lib/request';
 import { json, unauthorized } from '@/lib/response';
-import { canViewAuthenticatedWebsite } from '@/permissions';
+import { canViewAuthenticatedWebsite, canViewSharedReplay } from '@/permissions';
 import { getReplayChunks } from '@/queries/sql';
 
 function getEventTimestamp(event: any): number | null {
@@ -87,7 +87,13 @@ export async function GET(
   const endEventIndex = parseOptionalInteger(searchParams.get('eventIndex'));
   const endAt = until !== undefined ? new Date(until) : undefined;
 
-  if (!(await canViewAuthenticatedWebsite(auth, websiteId))) {
+  // Owners keep their existing access; a public share link is additionally
+  // allowed through, scoped to this one visit by canViewSharedReplay.
+  const canView =
+    (await canViewAuthenticatedWebsite(auth, websiteId)) ||
+    (await canViewSharedReplay(auth, websiteId, replayId));
+
+  if (!canView) {
     return unauthorized();
   }
 

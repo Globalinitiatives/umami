@@ -36,6 +36,9 @@ export interface Auth {
     pixelIds?: string[];
     linkId?: string;
     linkIds?: string[];
+    /** Set on replay share tokens: the single visit and slug the link is bound to. */
+    visitId?: string;
+    slug?: string;
     parameters?: ShareParameters;
   };
 }

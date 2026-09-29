@@ -433,7 +433,14 @@
     "never": "Never",
     "copy": "Copy",
     "authorize": "Authorize",
-    "deny": "Deny"
+    "deny": "Deny",
+    "shared": "Shared",
+    "expires": "Expires",
+    "revoke": "Revoke",
+    "share-replay": "Share replay",
+    "replay-link-copied": "Link copied to clipboard",
+    "link-expires-in": "Link expires in",
+    "replay-link": "Replay link"
   },
   "message": {
     "action-confirmation": "Type {confirmation} in the box below to confirm.",
@@ -521,6 +528,8 @@
     "two-factor-locked-message": "Too many failed attempts. Try again at {time}.",
     "two-factor-active-description": "Your account is protected with two-factor authentication. Each login requires a code from your authenticator app.",
     "api-key-created": "Copy your API key now. You won't be able to see it again.",
-    "no-api-keys": "You have not created any API keys."
+    "no-api-keys": "You have not created any API keys.",
+    "replayShared": "Replay link created. It expires automatically and can be revoked at any time.",
+    "replayRevoked": "Replay link revoked."
   }
 }
