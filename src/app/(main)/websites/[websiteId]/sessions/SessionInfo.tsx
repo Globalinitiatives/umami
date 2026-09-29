@@ -19,9 +19,17 @@ export function SessionInfo({ data }) {
 
   return (
     <Grid columns="repeat(auto-fit, minmax(200px, 1fr)" gap>
-      <Info label={t(labels.distinctId)} icon={<KeyRound />}>
-        {distinctId ? <span style={{ overflowWrap: 'anywhere' }}>{distinctId}</span> : '—'}
-      </Info>
+      {/*
+        The visitor identifier is absent on public replay links, where the API
+        strips it: distinctId follows one person across visits, so it must not
+        reach a client outside the team. Hide the row rather than rendering it
+        empty so a "Distinct ID: —" placeholder never appears on a shared link.
+      */}
+      {distinctId && (
+        <Info label={t(labels.distinctId)} icon={<KeyRound />}>
+          <span style={{ overflowWrap: 'anywhere' }}>{distinctId}</span>
+        </Info>
+      )}
 
       <Info label={t(labels.lastSeen)} icon={<Calendar />}>
         <DateDistance date={new Date(data.lastAt)} />

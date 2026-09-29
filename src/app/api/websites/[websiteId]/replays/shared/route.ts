@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { parseRequest } from '@/lib/request';
-import { json, unauthorized } from '@/lib/response';
+import { badRequest, json, unauthorized } from '@/lib/response';
 import { pagingParams, searchParams } from '@/lib/schema';
 import { canViewAuthenticatedWebsite } from '@/permissions';
 import {
@@ -8,6 +8,7 @@ import {
   DEFAULT_SHARE_DURATION,
   getSharedReplays,
   isShareDuration,
+  ReplayShareClosedError,
 } from '@/queries/prisma/sessionReplayShared';
 
 export async function GET(
@@ -44,6 +45,7 @@ export async function POST(
     visitId: z.string().uuid(),
     note: z.string().max(500).optional(),
     duration: z.string().optional(),
+    showSessionInfo: z.boolean().optional(),
   });
 
   const { auth, body, error } = await parseRequest(request, schema);
@@ -60,14 +62,25 @@ export async function POST(
     return unauthorized();
   }
 
-  const { visitId, note, duration } = body;
+  const { visitId, note, duration, showSessionInfo } = body;
 
-  const share = await createReplayShared({
-    websiteId,
-    visitId,
-    note,
-    duration: isShareDuration(duration) ? duration : DEFAULT_SHARE_DURATION,
-  });
+  try {
+    const share = await createReplayShared({
+      websiteId,
+      visitId,
+      note,
+      showSessionInfo,
+      duration: isShareDuration(duration) ? duration : DEFAULT_SHARE_DURATION,
+    });
 
-  return json(share);
+    return json(share);
+  } catch (e) {
+    // A revoked or expired share stays closed: re-issuing would quietly replace
+    // the expiry we told the recipient about with a new link.
+    if (e instanceof ReplayShareClosedError) {
+      return badRequest({ message: e.message, code: e.code });
+    }
+
+    throw e;
+  }
 }

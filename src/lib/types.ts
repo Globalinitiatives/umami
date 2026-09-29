@@ -44,6 +44,13 @@ export interface Auth {
      * `shareType` was introduced stay identifiable as replay-scoped.
      */
     entityType?: number;
+    /**
+     * Set on replay share tokens when the owner opted the share into showing the
+     * session summary. The session endpoint requires it, and it is read from the
+     * signed token rather than the request body, so a public client cannot turn
+     * the summary on for a share that has it off.
+     */
+    showSessionInfo?: boolean;
     parameters?: ShareParameters;
   };
 }

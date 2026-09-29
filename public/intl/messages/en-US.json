@@ -440,7 +440,11 @@
     "share-replay": "Share replay",
     "replay-link-copied": "Link copied to clipboard",
     "link-expires-in": "Link expires in",
-    "replay-link": "Replay link"
+    "replay-link": "Replay link",
+    "summary": "Summary",
+    "copy-link": "Copy link",
+    "replay-show-session-info": "Show session summary",
+    "replay-show-session-info-description": "Also show the visitor's country, device, browser and timings on the shared page. The visitor ID is never included."
   },
   "message": {
     "action-confirmation": "Type {confirmation} in the box below to confirm.",
@@ -530,6 +534,9 @@
     "api-key-created": "Copy your API key now. You won't be able to see it again.",
     "no-api-keys": "You have not created any API keys.",
     "replayShared": "Replay link created. It expires automatically and can be revoked at any time.",
-    "replayRevoked": "Replay link revoked."
+    "replayRevoked": "Replay link revoked.",
+    "replay-link-copied": "Link copied to clipboard.",
+    "replaySummaryOn": "Session summary is shown on this link.",
+    "replaySummaryOff": "Session summary is hidden on this link."
   }
 }

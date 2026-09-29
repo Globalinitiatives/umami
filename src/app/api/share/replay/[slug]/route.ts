@@ -34,11 +34,13 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
     visitId: record.visitId,
     slug: record.slug,
     expiresAt: record.expiresAt,
+    showSessionInfo: record.showSessionInfo,
   });
 
   return json({
     websiteId: record.websiteId,
     visitId: record.visitId,
+    showSessionInfo: record.showSessionInfo,
     token,
     expiresAt: record.expiresAt,
   });
