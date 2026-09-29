@@ -9,6 +9,8 @@ export interface ReplayShareData {
   visitId: string;
   token: string;
   expiresAt: string;
+  /** Whether this share opted into showing the session summary on the public page. */
+  showSessionInfo: boolean;
 }
 
 export const ReplayShareContext = createContext<ReplayShareData>(null);

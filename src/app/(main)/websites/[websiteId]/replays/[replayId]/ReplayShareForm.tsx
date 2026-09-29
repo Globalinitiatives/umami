@@ -1,6 +1,7 @@
 'use client';
 import {
   Button,
+  Checkbox,
   Column,
   Form,
   FormButtons,
@@ -37,7 +38,7 @@ export function ReplayShareForm({
   const [url, setUrl] = useState<string>(null);
 
   const { mutateAsync, error, isPending } = useMutation({
-    mutationFn: (payload: { note: string; duration: string }) =>
+    mutationFn: (payload: { note: string; duration: string; showSessionInfo: boolean }) =>
       post(`/websites/${websiteId}/replays/shared`, {
         visitId: replayId,
         ...payload,
@@ -47,10 +48,15 @@ export function ReplayShareForm({
   const getUrl = (slug: string) =>
     `${cloudMode ? process.env.cloudUrl : window?.location.origin}${process.env.basePath || ''}/share/replay/${slug}`;
 
-  const handleSubmit = async (formData: { note: string; duration: string }) => {
+  const handleSubmit = async (formData: {
+    note: string;
+    duration: string;
+    showSessionInfo: boolean;
+  }) => {
     const result = await mutateAsync({
       note: formData.note,
       duration: formData.duration,
+      showSessionInfo: formData.showSessionInfo === true,
     });
 
     setUrl(getUrl(result.slug));
@@ -90,6 +96,12 @@ export function ReplayShareForm({
             </Radio>
           ))}
         </RadioGroup>
+      </FormField>
+      {/* Off by default. The summary tells the recipient who the visitor was,
+          where they were and what device they used, so it stays opt-in and the
+          visitor identifier is never part of it. */}
+      <FormField name="showSessionInfo" label={t(labels.replayShowSessionInfo)}>
+        <Checkbox>{t(labels.replayShowSessionInfoDescription)}</Checkbox>
       </FormField>
       <FormButtons>
         <Button isDisabled={isPending} onPress={onClose}>

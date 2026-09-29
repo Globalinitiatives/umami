@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 import { getApiUrl } from '@/lib/api-url';
 import { getClientAuthToken } from '@/lib/client';
 import { SHARE_CONTEXT_HEADER, SHARE_TOKEN_HEADER } from '@/lib/constants';
-import { type FetchResponse, httpDelete, httpGet, httpPost, httpPut } from '@/lib/fetch';
+import { type FetchResponse, httpDelete, httpGet, httpPatch, httpPost, httpPut } from '@/lib/fetch';
 import { useApp } from '@/store/app';
 
 async function handleResponse(res: FetchResponse): Promise<any> {
@@ -20,9 +20,7 @@ export function useApi() {
   const shareToken = useApp(state => state.shareToken?.token);
 
   const shareHeaders =
-    shareId && shareToken
-      ? { [SHARE_TOKEN_HEADER]: shareToken, [SHARE_CONTEXT_HEADER]: '1' }
-      : {};
+    shareId && shareToken ? { [SHARE_TOKEN_HEADER]: shareToken, [SHARE_CONTEXT_HEADER]: '1' } : {};
 
   const defaultHeaders = {
     authorization: `Bearer ${getClientAuthToken()}`,
@@ -56,6 +54,13 @@ export function useApi() {
         return httpPut(getUrl(url), params, getHeaders(headers)).then(handleResponse);
       },
       [httpPut],
+    ),
+
+    patch: useCallback(
+      async (url: string, params: object = {}, headers: object = {}) => {
+        return httpPatch(getUrl(url), params, getHeaders(headers)).then(handleResponse);
+      },
+      [httpPatch],
     ),
 
     del: useCallback(

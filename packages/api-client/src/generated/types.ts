@@ -994,6 +994,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/share/replay/{slug}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get share replay slug
+     * @description Generated from the App Router handler and its request-validation source. Add a colocated contract.ts to supply exact response models and curated documentation.
+     */
+    get: operations['getShareReplaySlug'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/teams': {
     parameters: {
       query?: never;
@@ -2193,6 +2213,58 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  '/api/websites/{websiteId}/replays/shared': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get websites website id replays shared
+     * @description Generated from the App Router handler and its request-validation source. Add a colocated contract.ts to supply exact response models and curated documentation.
+     */
+    get: operations['getWebsitesWebsiteIdReplaysShared'];
+    put?: never;
+    /**
+     * Create or update websites website id replays shared
+     * @description Generated from the App Router handler and its request-validation source. Add a colocated contract.ts to supply exact response models and curated documentation.
+     */
+    post: operations['postWebsitesWebsiteIdReplaysShared'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/websites/{websiteId}/replays/shared/{replayId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get websites website id replays shared replay id
+     * @description Generated from the App Router handler and its request-validation source. Add a colocated contract.ts to supply exact response models and curated documentation.
+     */
+    get: operations['getWebsitesWebsiteIdReplaysSharedReplayId'];
+    put?: never;
+    post?: never;
+    /**
+     * Delete websites website id replays shared replay id
+     * @description Generated from the App Router handler and its request-validation source. Add a colocated contract.ts to supply exact response models and curated documentation.
+     */
+    delete: operations['deleteWebsitesWebsiteIdReplaysSharedReplayId'];
+    options?: never;
+    head?: never;
+    /**
+     * Update websites website id replays shared replay id
+     * @description Generated from the App Router handler and its request-validation source. Add a colocated contract.ts to supply exact response models and curated documentation.
+     */
+    patch: operations['patchWebsitesWebsiteIdReplaysSharedReplayId'];
     trace?: never;
   };
   '/api/websites/{websiteId}/reset': {
@@ -9526,6 +9598,59 @@ export interface operations {
            *         "code": "unauthorized",
            *         "message": "Unauthorized.",
            *         "status": 401
+           *       }
+           *     }
+           */
+          'application/json': components['schemas']['ApiError'];
+        };
+      };
+    };
+  };
+  getShareReplaySlug: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description URL slug used to access the resource. */
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The operation completed successfully. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /**
+             * Format: date-time
+             * @description Date and time the credential expires.
+             */
+            expiresAt: string;
+            showSessionInfo: boolean;
+            token: unknown;
+            /** @description ID of the visit. */
+            visitId: string;
+            /** @description ID of the website. */
+            websiteId: string;
+          };
+        };
+      };
+      /** @description Not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          /**
+           * @example {
+           *       "error": {
+           *         "code": "not-found",
+           *         "message": "Not found.",
+           *         "status": 404
            *       }
            *     }
            */
@@ -18650,6 +18775,386 @@ export interface operations {
            *         "code": "unauthorized",
            *         "message": "Unauthorized.",
            *         "status": 401
+           *       }
+           *     }
+           */
+          'application/json': components['schemas']['ApiError'];
+        };
+      };
+    };
+  };
+  getWebsitesWebsiteIdReplaysShared: {
+    parameters: {
+      query?: {
+        /** @description Maximum number of results to include. */
+        maxResults?: number;
+        /** @description Page number, starting at 1. */
+        page?: number;
+        /** @description Number of results per page. */
+        pageSize?: number;
+        /** @description Search text used to filter results. */
+        search?: string;
+      };
+      header?: never;
+      path: {
+        /** @description ID of the website. */
+        websiteId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The operation completed successfully. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @description Number of matching records. */
+            count: number;
+            /** @description Data returned by the operation. */
+            data: unknown[];
+            /** @description Whether the results were truncated by the maximum result limit. */
+            isCapped?: boolean;
+            /** @description Field to sort the results by. */
+            orderBy?: string;
+            /** @description Page number, starting at 1. */
+            page: number;
+            /** @description Number of results per page. */
+            pageSize: number;
+            /** @description Search text used to filter results. */
+            search?: string;
+            /** @description Whether to sort results in descending order. */
+            sortDescending?: boolean;
+          };
+        };
+      };
+      /** @description Bad request. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          /**
+           * @example {
+           *       "error": {
+           *         "code": "bad-request",
+           *         "message": "Bad request.",
+           *         "status": 400
+           *       }
+           *     }
+           */
+          'application/json': components['schemas']['ApiError'];
+        };
+      };
+      /** @description Unauthorized. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          /**
+           * @example {
+           *       "error": {
+           *         "code": "unauthorized",
+           *         "message": "Unauthorized.",
+           *         "status": 401
+           *       }
+           *     }
+           */
+          'application/json': components['schemas']['ApiError'];
+        };
+      };
+    };
+  };
+  postWebsitesWebsiteIdReplaysShared: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ID of the website. */
+        websiteId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @description Replay duration in milliseconds. */
+          duration?: string;
+          /** @description Text of the annotation. */
+          note?: string;
+          showSessionInfo?: boolean;
+          /**
+           * Format: uuid
+           * @description ID of the visit.
+           */
+          visitId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description The operation completed successfully. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /**
+             * Format: date-time
+             * @description Date and time the record was created.
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description Date and time the credential expires.
+             */
+            expiresAt: string;
+            /** @description Unique identifier of the resource. */
+            id: string;
+            /** @description Text of the annotation. */
+            note: string;
+            /**
+             * Format: date-time
+             * @description Date and time the credential was revoked.
+             */
+            revokedAt: string;
+            showSessionInfo: boolean;
+            /** @description URL slug used to access the resource. */
+            slug: string;
+            token: unknown;
+            /**
+             * Format: date-time
+             * @description Date and time the record was last updated.
+             */
+            updatedAt: string;
+            /** @description URL associated with the resource. */
+            url: string;
+            /** @description ID of the visit. */
+            visitId: string;
+            /** @description ID of the website. */
+            websiteId: string;
+          };
+        };
+      };
+      /** @description Bad request. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          /**
+           * @example {
+           *       "error": {
+           *         "code": "bad-request",
+           *         "message": "Bad request.",
+           *         "status": 400
+           *       }
+           *     }
+           */
+          'application/json': components['schemas']['ApiError'];
+        };
+      };
+      /** @description Unauthorized. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          /**
+           * @example {
+           *       "error": {
+           *         "code": "unauthorized",
+           *         "message": "Unauthorized.",
+           *         "status": 401
+           *       }
+           *     }
+           */
+          'application/json': components['schemas']['ApiError'];
+        };
+      };
+    };
+  };
+  getWebsitesWebsiteIdReplaysSharedReplayId: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ID of the session replay. */
+        replayId: string;
+        /** @description ID of the website. */
+        websiteId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The operation completed successfully. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /**
+             * Format: date-time
+             * @description Date and time the credential expires.
+             */
+            expiresAt: string;
+            isShared: boolean;
+            /** @description Text of the annotation. */
+            note: string;
+            showSessionInfo: boolean;
+          };
+        };
+      };
+      /** @description Unauthorized. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          /**
+           * @example {
+           *       "error": {
+           *         "code": "unauthorized",
+           *         "message": "Unauthorized.",
+           *         "status": 401
+           *       }
+           *     }
+           */
+          'application/json': components['schemas']['ApiError'];
+        };
+      };
+    };
+  };
+  deleteWebsitesWebsiteIdReplaysSharedReplayId: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ID of the session replay. */
+        replayId: string;
+        /** @description ID of the website. */
+        websiteId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The operation completed successfully. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @description Whether the operation succeeded. */
+            ok: boolean;
+          };
+        };
+      };
+      /** @description Unauthorized. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          /**
+           * @example {
+           *       "error": {
+           *         "code": "unauthorized",
+           *         "message": "Unauthorized.",
+           *         "status": 401
+           *       }
+           *     }
+           */
+          'application/json': components['schemas']['ApiError'];
+        };
+      };
+    };
+  };
+  patchWebsitesWebsiteIdReplaysSharedReplayId: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ID of the session replay. */
+        replayId: string;
+        /** @description ID of the website. */
+        websiteId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          showSessionInfo: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description The operation completed successfully. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            showSessionInfo: unknown;
+          };
+        };
+      };
+      /** @description Bad request. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          /**
+           * @example {
+           *       "error": {
+           *         "code": "bad-request",
+           *         "message": "Bad request.",
+           *         "status": 400
+           *       }
+           *     }
+           */
+          'application/json': components['schemas']['ApiError'];
+        };
+      };
+      /** @description Unauthorized. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          /**
+           * @example {
+           *       "error": {
+           *         "code": "unauthorized",
+           *         "message": "Unauthorized.",
+           *         "status": 401
+           *       }
+           *     }
+           */
+          'application/json': components['schemas']['ApiError'];
+        };
+      };
+      /** @description Not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          /**
+           * @example {
+           *       "error": {
+           *         "code": "not-found",
+           *         "message": "Not found.",
+           *         "status": 404
            *       }
            *     }
            */

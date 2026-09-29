@@ -298,6 +298,14 @@ export const operations = {
     queryParams: [],
     hasBody: false,
   },
+  deleteWebsitesWebsiteIdReplaysSharedReplayId: {
+    operationId: 'deleteWebsitesWebsiteIdReplaysSharedReplayId',
+    method: 'delete',
+    path: '/api/websites/{websiteId}/replays/shared/{replayId}',
+    pathParams: ['websiteId', 'replayId'],
+    queryParams: [],
+    hasBody: false,
+  },
   disableTwoFactor: {
     operationId: 'disableTwoFactor',
     method: 'post',
@@ -1401,6 +1409,14 @@ export const operations = {
     operationId: 'getShareBySlug',
     method: 'get',
     path: '/api/share/{slug}',
+    pathParams: ['slug'],
+    queryParams: [],
+    hasBody: false,
+  },
+  getShareReplaySlug: {
+    operationId: 'getShareReplaySlug',
+    method: 'get',
+    path: '/api/share/replay/{slug}',
     pathParams: ['slug'],
     queryParams: [],
     hasBody: false,
@@ -2834,6 +2850,22 @@ export const operations = {
     ],
     hasBody: false,
   },
+  getWebsitesWebsiteIdReplaysShared: {
+    operationId: 'getWebsitesWebsiteIdReplaysShared',
+    method: 'get',
+    path: '/api/websites/{websiteId}/replays/shared',
+    pathParams: ['websiteId'],
+    queryParams: ['page', 'pageSize', 'maxResults', 'search'],
+    hasBody: false,
+  },
+  getWebsitesWebsiteIdReplaysSharedReplayId: {
+    operationId: 'getWebsitesWebsiteIdReplaysSharedReplayId',
+    method: 'get',
+    path: '/api/websites/{websiteId}/replays/shared/{replayId}',
+    pathParams: ['websiteId', 'replayId'],
+    queryParams: [],
+    hasBody: false,
+  },
   getWebsiteUtmMetrics: {
     operationId: 'getWebsiteUtmMetrics',
     method: 'get',
@@ -2938,6 +2970,22 @@ export const operations = {
     pathParams: [],
     queryParams: [],
     hasBody: false,
+  },
+  patchWebsitesWebsiteIdReplaysSharedReplayId: {
+    operationId: 'patchWebsitesWebsiteIdReplaysSharedReplayId',
+    method: 'patch',
+    path: '/api/websites/{websiteId}/replays/shared/{replayId}',
+    pathParams: ['websiteId', 'replayId'],
+    queryParams: [],
+    hasBody: true,
+  },
+  postWebsitesWebsiteIdReplaysShared: {
+    operationId: 'postWebsitesWebsiteIdReplaysShared',
+    method: 'post',
+    path: '/api/websites/{websiteId}/replays/shared',
+    pathParams: ['websiteId'],
+    queryParams: [],
+    hasBody: true,
   },
   record: {
     operationId: 'record',
@@ -3566,6 +3614,18 @@ export abstract class GeneratedUmamiClient {
   }
 
   /**
+   * Delete websites website id replays shared replay id
+   * Generated from the App Router handler and its request-validation source. Add a colocated contract.ts to supply exact response models and curated documentation.
+   * `DELETE /api/websites/{websiteId}/replays/shared/{replayId}`
+   */
+  deleteWebsitesWebsiteIdReplaysSharedReplayId(
+    input: OperationInput<'deleteWebsitesWebsiteIdReplaysSharedReplayId'>,
+    options?: RequestOptions,
+  ): Promise<OperationOutput<'deleteWebsitesWebsiteIdReplaysSharedReplayId'>> {
+    return this.execute('deleteWebsitesWebsiteIdReplaysSharedReplayId', input, options);
+  }
+
+  /**
    * Disable two-factor authentication
    * Disables two-factor authentication for the current user after verifying their password and authenticator code. Rejected when an administrator or team requires it.
    * `POST /api/2fa/disable`
@@ -4067,6 +4127,18 @@ export abstract class GeneratedUmamiClient {
     options?: RequestOptions,
   ): Promise<OperationOutput<'getShareBySlug'>> {
     return this.execute('getShareBySlug', input, options);
+  }
+
+  /**
+   * Get share replay slug
+   * Generated from the App Router handler and its request-validation source. Add a colocated contract.ts to supply exact response models and curated documentation.
+   * `GET /api/share/replay/{slug}`
+   */
+  getShareReplaySlug(
+    input: OperationInput<'getShareReplaySlug'>,
+    options?: RequestOptions,
+  ): Promise<OperationOutput<'getShareReplaySlug'>> {
+    return this.execute('getShareReplaySlug', input, options);
   }
 
   /**
@@ -4786,6 +4858,30 @@ export abstract class GeneratedUmamiClient {
   }
 
   /**
+   * Get websites website id replays shared
+   * Generated from the App Router handler and its request-validation source. Add a colocated contract.ts to supply exact response models and curated documentation.
+   * `GET /api/websites/{websiteId}/replays/shared`
+   */
+  getWebsitesWebsiteIdReplaysShared(
+    input: OperationInput<'getWebsitesWebsiteIdReplaysShared'>,
+    options?: RequestOptions,
+  ): Promise<OperationOutput<'getWebsitesWebsiteIdReplaysShared'>> {
+    return this.execute('getWebsitesWebsiteIdReplaysShared', input, options);
+  }
+
+  /**
+   * Get websites website id replays shared replay id
+   * Generated from the App Router handler and its request-validation source. Add a colocated contract.ts to supply exact response models and curated documentation.
+   * `GET /api/websites/{websiteId}/replays/shared/{replayId}`
+   */
+  getWebsitesWebsiteIdReplaysSharedReplayId(
+    input: OperationInput<'getWebsitesWebsiteIdReplaysSharedReplayId'>,
+    options?: RequestOptions,
+  ): Promise<OperationOutput<'getWebsitesWebsiteIdReplaysSharedReplayId'>> {
+    return this.execute('getWebsitesWebsiteIdReplaysSharedReplayId', input, options);
+  }
+
+  /**
    * Get website utm metrics
    * `GET /api/websites/{websiteId}/utm/metrics`
    */
@@ -4866,6 +4962,30 @@ export abstract class GeneratedUmamiClient {
     options?: RequestOptions,
   ): Promise<OperationOutput<'logout'>> {
     return this.execute('logout', input, options);
+  }
+
+  /**
+   * Update websites website id replays shared replay id
+   * Generated from the App Router handler and its request-validation source. Add a colocated contract.ts to supply exact response models and curated documentation.
+   * `PATCH /api/websites/{websiteId}/replays/shared/{replayId}`
+   */
+  patchWebsitesWebsiteIdReplaysSharedReplayId(
+    input: OperationInput<'patchWebsitesWebsiteIdReplaysSharedReplayId'>,
+    options?: RequestOptions,
+  ): Promise<OperationOutput<'patchWebsitesWebsiteIdReplaysSharedReplayId'>> {
+    return this.execute('patchWebsitesWebsiteIdReplaysSharedReplayId', input, options);
+  }
+
+  /**
+   * Create or update websites website id replays shared
+   * Generated from the App Router handler and its request-validation source. Add a colocated contract.ts to supply exact response models and curated documentation.
+   * `POST /api/websites/{websiteId}/replays/shared`
+   */
+  postWebsitesWebsiteIdReplaysShared(
+    input: OperationInput<'postWebsitesWebsiteIdReplaysShared'>,
+    options?: RequestOptions,
+  ): Promise<OperationOutput<'postWebsitesWebsiteIdReplaysShared'>> {
+    return this.execute('postWebsitesWebsiteIdReplaysShared', input, options);
   }
 
   /**
