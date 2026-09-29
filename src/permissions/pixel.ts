@@ -2,10 +2,16 @@ import { hasPermission } from '@/lib/auth';
 import { PERMISSIONS } from '@/lib/constants';
 import type { Auth } from '@/lib/types';
 import { getPixel, getTeamUser } from '@/queries/prisma';
+import { isReplayShareToken } from './replay-token';
 
 export async function canViewPixel({ user, shareToken }: Auth, pixelId: string) {
   if (user?.isAdmin) {
     return true;
+  }
+
+  // A replay share token is not a pixel or website credential.
+  if (isReplayShareToken({ shareToken })) {
+    return false;
   }
 
   if (

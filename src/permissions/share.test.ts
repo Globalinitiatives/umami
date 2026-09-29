@@ -243,6 +243,82 @@ test('rejects a record whose expiry is exactly now', async () => {
   await expect(canViewSharedReplay(shareAuth(), WEBSITE_ID, VISIT_ID)).resolves.toBe(false);
 });
 
+/**
+ * A replay share link is a credential for ONE recording. These tests pin the
+ * negative half of that boundary: a replay token must not satisfy any of the
+ * website-wide share guards, which between them guard every analytics endpoint
+ * for a site. Without these, a replay token carrying `websiteId` passes them
+ * like any website share and the public link becomes a full-website credential.
+ */
+const replayToken = (overrides: Record<string, any> = {}) =>
+  ({
+    shareToken: {
+      shareType: ENTITY_TYPE.replay,
+      entityType: ENTITY_TYPE.replay,
+      websiteId: WEBSITE_ID,
+      visitId: VISIT_ID,
+      slug: SLUG,
+      ...overrides,
+    },
+  }) as any;
+
+test('replay token is not treated as website-wide share access', async () => {
+  resetMocks();
+  const auth = replayToken();
+
+  await expect(canViewWebsiteSection(auth, WEBSITE_ID, 'sessions')).resolves.toBe(false);
+  await expect(canViewWebsiteSection(auth, WEBSITE_ID, ['events', 'revenue'])).resolves.toBe(false);
+  await expect(canViewSharedWebsite(auth, WEBSITE_ID)).resolves.toBe(false);
+  await expect(canViewSharedWebsiteFilters(auth, WEBSITE_ID)).resolves.toBe(false);
+});
+
+test('replay token is rejected for sections that do not exist', async () => {
+  resetMocks();
+
+  await expect(
+    canViewWebsiteSection(replayToken(), WEBSITE_ID, 'not-a-real-section' as any),
+  ).resolves.toBe(false);
+});
+
+test('a pre-fix replay token (entityType: website) is also not website-wide access', async () => {
+  resetMocks();
+  // Tokens already minted before this fix used ENTITY_TYPE.website. They carry
+  // visitId+slug, so the structural check must catch them too.
+  const legacy = replayToken({ shareType: undefined, entityType: ENTITY_TYPE.website });
+
+  await expect(canViewWebsiteSection(legacy, WEBSITE_ID, 'sessions')).resolves.toBe(false);
+  await expect(canViewSharedWebsite(legacy, WEBSITE_ID)).resolves.toBe(false);
+  await expect(canViewSharedWebsiteFilters(legacy, WEBSITE_ID)).resolves.toBe(false);
+});
+
+test('ordinary website shares are unaffected by the replay guard', async () => {
+  resetMocks();
+
+  await expect(
+    canViewWebsiteSection(
+      { shareToken: { shareType: ENTITY_TYPE.website, websiteId: WEBSITE_ID, parameters: {} } },
+      WEBSITE_ID,
+      'sessions',
+    ),
+  ).resolves.toBe(true);
+});
+
+test('a replay token still opens its own recording', async () => {
+  resetMocks();
+  mockShareRecord();
+
+  await expect(canViewSharedReplay(replayToken(), WEBSITE_ID, VISIT_ID)).resolves.toBe(true);
+});
+
+test('a pre-fix replay token still opens its own recording', async () => {
+  resetMocks();
+  mockShareRecord();
+
+  const legacy = replayToken({ shareType: undefined, entityType: ENTITY_TYPE.website });
+
+  await expect(canViewSharedReplay(legacy, WEBSITE_ID, VISIT_ID)).resolves.toBe(true);
+});
+
 test('rejects a revoked record immediately, without waiting out the token', async () => {
   resetMocks();
   mockShareRecord({ revokedAt: new Date(), expiresAt: new Date(Date.now() + 23 * 60 * 60 * 1000) });

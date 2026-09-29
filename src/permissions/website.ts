@@ -4,10 +4,17 @@ import { getEntity } from '@/lib/entity';
 import prisma from '@/lib/prisma';
 import type { Auth } from '@/lib/types';
 import { getTeamUser, getWebsite } from '@/queries/prisma';
+import { isReplayShareToken } from './replay-token';
 
 export async function canViewWebsite({ user, shareToken }: Auth, websiteId: string) {
   if (user?.isAdmin) {
     return true;
+  }
+
+  // A replay share token carries a websiteId only to scope the recording, so it
+  // must be rejected before the id comparisons below.
+  if (isReplayShareToken({ shareToken })) {
+    return false;
   }
 
   if (
@@ -49,6 +56,10 @@ export async function canViewBatchWebsites({ user, shareToken }: Auth, websiteId
 
   if (user?.isAdmin) {
     return requestedIds;
+  }
+
+  if (isReplayShareToken({ shareToken })) {
+    return [];
   }
 
   const shareAllowedIds = new Set(

@@ -37,7 +37,12 @@ export function createReplayShareToken(args: {
   return createToken(
     {
       type: SHARE_TOKEN_TYPE,
-      entityType: ENTITY_TYPE.website,
+      // Both keys are set deliberately: `shareType` is the key real share
+      // tokens use, `entityType` keeps older tokens identifiable. Neither is
+      // ENTITY_TYPE.website — a replay link must not be able to satisfy the
+      // website-wide share guards.
+      shareType: ENTITY_TYPE.replay,
+      entityType: ENTITY_TYPE.replay,
       websiteId: args.websiteId,
       visitId: args.visitId,
       slug: args.slug,
