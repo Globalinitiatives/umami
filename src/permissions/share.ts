@@ -1,5 +1,6 @@
 import type { Auth } from '@/lib/types';
 import { getReplaySharedBySlug } from '@/queries/prisma';
+import { isReplayShareToken } from './replay-token';
 import { canViewWebsite } from './website';
 
 export type ShareSection =
@@ -39,6 +40,10 @@ type ShareSectionInput = ShareSection | ShareSection[];
 
 function shareTokenIncludesWebsite(auth: Auth | null | undefined, websiteId: string) {
   const { shareToken } = auth || {};
+
+  if (isReplayShareToken(auth)) {
+    return false;
+  }
 
   return (
     shareToken?.websiteId === websiteId ||
@@ -136,8 +141,11 @@ export async function canViewSharedReplay(
   }
 
   // A replay share token must be bound to this exact website AND this exact
-  // visit. Website-wide share tokens carry neither and are rejected here.
-  if (!shareTokenIncludesWebsite(auth, websiteId)) {
+  // visit. This is checked directly rather than via shareTokenIncludesWebsite,
+  // which deliberately rejects replay tokens so they cannot be used as
+  // website-wide credentials. Website-wide share tokens carry neither a visitId
+  // nor a slug and are rejected here.
+  if (shareToken.websiteId !== websiteId) {
     return false;
   }
 

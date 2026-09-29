@@ -39,6 +39,11 @@ export interface Auth {
     /** Set on replay share tokens: the single visit and slug the link is bound to. */
     visitId?: string;
     slug?: string;
+    /**
+     * Set on replay share tokens alongside `shareType`, so tokens minted before
+     * `shareType` was introduced stay identifiable as replay-scoped.
+     */
+    entityType?: number;
     parameters?: ShareParameters;
   };
 }

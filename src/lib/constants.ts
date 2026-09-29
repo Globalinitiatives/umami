@@ -134,6 +134,13 @@ export const ENTITY_TYPE = {
   link: 2,
   pixel: 3,
   board: 4,
+  /**
+   * A single shared replay recording. Deliberately distinct from `website` so a
+   * replay share token can never satisfy the website-wide share guards, which
+   * would otherwise grant a public replay link access to the entire site's
+   * analytics.
+   */
+  replay: 5,
 } as const;
 
 export const DATA_TYPE = {
