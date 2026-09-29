@@ -280,17 +280,96 @@ type MetricEntry = PerformanceEntry & {
   const stripOrigin = (url: string): string =>
     url === origin || url?.startsWith(origin + '/') ? url.slice(origin.length) : url;
 
-  const getPayload = () => ({
-    website,
-    screen,
-    language,
-    title: document.title,
-    hostname,
-    url: currentUrl,
-    referrer: stripOrigin(currentRef),
-    tag,
-    id: identity ? identity : undefined,
-  });
+  // UTM parameters are captured once, in memory, and re-attached to every
+  // subsequent event in this page's lifetime. A custom event fired after SPA
+  // navigation would otherwise carry no attribution, because the query string
+  // that carried the campaign is no longer in the URL.
+  //
+  // In-memory only: nothing is written to storage, so this does not survive a
+  // hard page load. That is deliberate — it keeps the tracker free of a new
+  // persisted identifier, and the server already records the landing-page
+  // URL's own UTM params for the pageview itself.
+  //
+  // Reading is case-insensitive to match the server's `getUtmParam`, which
+  // accepts UTM_SOURCE, utm_source, Utm_Source and friends. A new value does
+  // not overwrite an existing one, so the first campaign in a page's lifetime
+  // is the one that attributes its events.
+  const utmKeys = ['source', 'medium', 'campaign', 'content', 'term'] as const;
+  type UtmKey = (typeof utmKeys)[number];
+  type Utms = Partial<Record<UtmKey, string>>;
+
+  let utms: Utms = {};
+
+  const readUtms = (): Utms => {
+    if (excludeSearch) return {};
+
+    const found: Utms = {};
+    let params: URLSearchParams;
+
+    try {
+      params = new URLSearchParams(location.search);
+    } catch {
+      return {};
+    }
+
+    const lower = new Map<string, string>();
+    for (const [key, value] of params) {
+      lower.set(key.toLowerCase(), value);
+    }
+
+    for (const key of utmKeys) {
+      const value = lower.get(`utm_${key}`);
+      if (value) found[key] = value;
+    }
+
+    return found;
+  };
+
+  const getUtms = (): Utms => {
+    const found = readUtms();
+
+    // First capture in this page's lifetime wins; later navigations do not
+    // replace an attribution already established.
+    for (const key of utmKeys) {
+      if (found[key] && !utms[key]) utms[key] = found[key];
+    }
+
+    return utms;
+  };
+
+  const getPayload = () => {
+    const payloadUtms = getUtms();
+
+    return {
+      website,
+      screen,
+      language,
+      title: document.title,
+      hostname,
+      url: currentUrl,
+      referrer: stripOrigin(currentRef),
+      tag,
+      id: identity ? identity : undefined,
+      // Sent as `data.utms` so the server's existing `dataUtms` fallback picks
+      // it up when the current URL carries no params of its own. The server
+      // prefers the URL, so a stale carry-forward can never override the page
+      // actually being viewed.
+      ...(Object.keys(payloadUtms).length > 0 && { data: { utms: payloadUtms } }),
+    };
+  };
+
+  /**
+   * The carried UTMs, lifted back out of a payload's `data`.
+   *
+   * `getPayload` nests them as `data.utms`; this recovers that shape so
+   * `track(name, data)` can merge a caller's own data without wrapping the
+   * object a second time.
+   */
+  const carriedUtms = (payload: Payload): Utms | undefined => {
+    const d = payload.data as { utms?: Utms } | undefined;
+    const found = d?.utms;
+    return found && Object.keys(found).length > 0 ? found : undefined;
+  };
 
   const hasDoNotTrack = () => {
     const dnt = doNotTrack || ndnt || msdnt;
@@ -433,7 +512,20 @@ type MetricEntry = PerformanceEntry & {
     name?: string | Payload | ((payload: Payload) => Payload),
     data?: EventData,
   ): Promise<void> => {
-    if (typeof name === 'string') return send({ ...getPayload(), name, data });
+    if (typeof name === 'string') {
+      const payload = getPayload();
+      const carried = carriedUtms(payload);
+
+      // A caller's own `data` must not displace the carried UTMs: this is the
+      // `track('signup', { plan: 'pro' })` case, which is the whole reason the
+      // capture exists. `utms` is placed first so a caller who sets one
+      // deliberately still wins.
+      if (carried) {
+        return send({ ...payload, name, data: { utms: carried, ...data } });
+      }
+
+      return send({ ...payload, name, data });
+    }
     if (typeof name === 'object') return send({ ...name });
     if (typeof name === 'function') return send(name(getPayload()));
     return send(getPayload());
@@ -450,10 +542,18 @@ type MetricEntry = PerformanceEntry & {
     }
 
     cache = '';
+    const payload = getPayload();
+    const carried = carriedUtms(payload);
+    const own = typeof id === 'object' ? id : data;
+
+    // Same merge as `track(name, data)`: without it the `data` key below
+    // overwrites the one `getPayload()` set, and the identify request would
+    // carry no attribution at all. A site using `data-distinct-id` fires this
+    // before its first pageview, so the dropped UTMs are the landing campaign.
     return send(
       {
-        ...getPayload(),
-        data: typeof id === 'object' ? id : data,
+        ...payload,
+        ...(carried ? { data: { utms: carried, ...own } } : { data: own }),
       },
       'identify',
     );
@@ -600,7 +700,10 @@ type MetricEntry = PerformanceEntry & {
 
       sent = true;
       if (timeoutId) clearTimeout(timeoutId);
-      send({ ...getPayload(), ...metrics }, 'performance');
+      // Drop `data` here: the server's performance branch never reads it, so
+      // carrying the UTMs here would ship a dead field on every perf beacon.
+      const { data, ...perfPayload } = getPayload();
+      send({ ...perfPayload, ...metrics }, 'performance');
     };
 
     flushPerformance = () => {
