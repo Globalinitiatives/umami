@@ -121,6 +121,7 @@ model Website {
   sessionData         SessionData[]
   sessionReplays      SessionReplay[]
   sessionReplaysSaved SessionReplaySaved[]
+  sessionReplaysShared SessionReplayShared[]
   heatmapEvents       HeatmapEvent[]
 
   @@index([userId])
@@ -451,6 +452,26 @@ model SessionReplaySaved {
   @@index([visitId])
   @@index([websiteId, createdAt])
   @@map("session_replay_saved")
+}
+
+model SessionReplayShared {
+  id        String    @id() @map("shared_replay_id") @db.Uuid
+  websiteId String    @map("website_id") @db.Uuid
+  visitId   String    @map("visit_id") @db.Uuid
+  slug      String    @unique() @db.VarChar(100)
+  note      String?   @db.VarChar(500)
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(6)
+  revokedAt DateTime? @map("revoked_at") @db.Timestamptz(6)
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  website Website @relation(fields: [websiteId], references: [id])
+
+  @@unique([websiteId, visitId])
+  @@index([websiteId])
+  @@index([visitId])
+  @@index([websiteId, createdAt])
+  @@map("session_replay_shared")
 }
 
 model HeatmapEvent {

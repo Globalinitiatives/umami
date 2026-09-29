@@ -1,6 +1,6 @@
 'use client';
 import { Button, Column, Dialog, DialogTrigger, Icon, Popover, Row, Text } from '@umami/react-zen';
-import { Bookmark, X } from 'lucide-react';
+import { Bookmark, Share2, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { SessionInfo } from '@/app/(main)/websites/[websiteId]/sessions/SessionInfo';
 import { Avatar } from '@/components/common/Avatar';
@@ -17,6 +17,7 @@ import { touch } from '@/components/hooks/useModified';
 import { getReplayViewport } from '@/lib/replay';
 import { ReplayPlayer } from './ReplayPlayer';
 import { ReplaySaveForm } from './ReplaySaveForm';
+import { ReplayShareForm } from './ReplayShareForm';
 
 type ReplayOrientation = 'portrait' | 'landscape';
 
@@ -117,6 +118,24 @@ export function ReplayPlayback({
                     </Popover>
                   </DialogTrigger>
                 )}
+                <DialogTrigger>
+                  <Button variant="quiet">
+                    <Icon>
+                      <Share2 />
+                    </Icon>
+                  </Button>
+                  <Popover side="bottom" align="end">
+                    <Dialog title={t(labels.shareReplay)} style={{ width: '360px' }}>
+                      {({ close }) => (
+                        <ReplayShareForm
+                          websiteId={websiteId}
+                          replayId={replayId}
+                          onClose={close}
+                        />
+                      )}
+                    </Dialog>
+                  </Popover>
+                </DialogTrigger>
                 {onClose && (
                   <Button onPress={onClose} variant="quiet">
                     <Icon>
