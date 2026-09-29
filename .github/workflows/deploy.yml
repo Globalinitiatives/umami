@@ -73,6 +73,12 @@ jobs:
             docker exec gmanalytics curl -sf http://localhost:3000/ && exit 0
             sleep 2
           done
+          echo "::group::Container state"
+          docker ps -a --filter name=gmanalytics --format '{{.Names}} {{.Status}}'
+          echo "::endgroup::"
+          echo "::group::Application logs"
+          docker logs --tail 100 gmanalytics 2>&1 || true
+          echo "::endgroup::"
           exit 1
 
       - name: Prune old images
