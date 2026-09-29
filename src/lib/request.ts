@@ -10,13 +10,27 @@ import {
   parseUniversalEventPropertyFilters,
 } from '@/lib/params';
 import { badRequest, unauthorized } from '@/lib/response';
+import { isShareTokenAuth } from '@/lib/share-route-guard';
 import type { QueryFilters } from '@/lib/types';
 import { getWebsiteSegment } from '@/queries/prisma';
+
+export interface ParseRequestOptions {
+  skipAuth?: boolean;
+  /**
+   * Opt in to being reached with a share token. Omit it (the default) and a
+   * share token is refused with 401 before the handler runs.
+   *
+   * This must be set per handler, not per route file: a single route can have a
+   * GET that serves a public share and a POST that must have a real user —
+   * `websites/[websiteId]/annotations` does exactly that.
+   */
+  allowShareToken?: boolean;
+}
 
 export async function parseRequest(
   request: Request,
   schema?: any,
-  options?: { skipAuth: boolean },
+  options?: ParseRequestOptions,
 ): Promise<any> {
   const url = new URL(request.url);
   let query = Object.fromEntries(url.searchParams);
@@ -53,6 +67,13 @@ export async function parseRequest(
 
     if (!auth) {
       error = () => unauthorized();
+    } else if (!options?.allowShareToken && isShareTokenAuth(auth)) {
+      // Refused here, before the handler runs, so a route that reads
+      // `auth.user.id` can never be reached with a share token — and so the
+      // query layer never sees `userId: undefined`, which Prisma would read as
+      // "no filter" and return every row for.
+      error = () => unauthorized();
+      auth = null;
     }
   }
 

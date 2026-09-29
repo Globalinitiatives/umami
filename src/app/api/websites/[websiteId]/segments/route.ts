@@ -15,7 +15,7 @@ export async function GET(
     ...searchParams,
   });
 
-  const { auth, query, error } = await parseRequest(request, schema);
+  const { auth, query, error } = await parseRequest(request, schema, { allowShareToken: true });
 
   if (error) {
     return error();

@@ -17,7 +17,7 @@ export async function GET(
     ...pagingParams,
   });
 
-  const { auth, query, error } = await parseRequest(request, schema);
+  const { auth, query, error } = await parseRequest(request, schema, { allowShareToken: true });
 
   if (error) {
     return error();
