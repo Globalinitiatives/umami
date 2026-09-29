@@ -9,7 +9,7 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ websiteId: string; segmentId: string }> },
 ) {
-  const { auth, error } = await parseRequest(request);
+  const { auth, error } = await parseRequest(request, null, { allowShareToken: true });
 
   if (error) {
     return error();
