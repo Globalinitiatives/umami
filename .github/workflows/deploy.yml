@@ -48,20 +48,6 @@ jobs:
             -v gmanalytics_db_data:/var/lib/postgresql/data \
             postgres:15-alpine
 
-      - name: Start Umami
-        run: |
-          docker run -d \
-            --name gmanalytics \
-            --network gmanalytics_network \
-            --restart always \
-            -e DATABASE_URL="postgresql://umami:${{ secrets.POSTGRES_PASSWORD }}@gmanalytics-db:5432/umami" \
-            -e APP_SECRET="${{ secrets.APP_SECRET }}" \
-            -e TWO_FACTOR_ENCRYPTION_KEY="${{ secrets.TWO_FACTOR_ENCRYPTION_KEY }}" \
-            -e TRACKER_SCRIPT_NAME=gmanalytics.js \
-            gmanalytics:latest
-
-          docker network connect nginxproxymanager_npmnetwork gmanalytics
-
       - name: Recover failed migrations
         run: |
           # PostgreSQL accepts TCP connections while still initialising and only
@@ -82,6 +68,11 @@ jobs:
           # `migrate deploy` fail with P3009 and wedge the deploy permanently.
           # Mark it rolled back, then drop the tables that migration creates, so
           # the corrected version can apply on this run.
+          #
+          # This runs before the app container starts, because the app's own
+          # startup (scripts/check-db.js) applies migrations and exits non-zero
+          # on P3009; recovering first means the app applies them on its first
+          # try instead of crash-looping until its restart lands after recovery.
           FAILED=$(docker exec gmanalytics-db psql -U umami -d umami -tAc \
             "SELECT migration_name FROM \"_prisma_migrations\" WHERE finished_at IS NULL AND rolled_back_at IS NULL;")
           if [ -z "$FAILED" ]; then
@@ -107,13 +98,19 @@ jobs:
             done
           done
 
-      - name: Apply migrations
+      - name: Start Umami
         run: |
-          # The app container starts before the database is ready, so its own
-          # migrate attempt is expected to fail first. Re-run it on the runner
-          # now that recovery has run and PostgreSQL is accepting queries.
-          docker exec -e DATABASE_URL="postgresql://umami:${{ secrets.POSTGRES_PASSWORD }}@gmanalytics-db:5432/umami" \
-            gmanalytics sh -c 'cd /app && node node_modules/.bin/prisma migrate deploy'
+          docker run -d \
+            --name gmanalytics \
+            --network gmanalytics_network \
+            --restart always \
+            -e DATABASE_URL="postgresql://umami:${{ secrets.POSTGRES_PASSWORD }}@gmanalytics-db:5432/umami" \
+            -e APP_SECRET="${{ secrets.APP_SECRET }}" \
+            -e TWO_FACTOR_ENCRYPTION_KEY="${{ secrets.TWO_FACTOR_ENCRYPTION_KEY }}" \
+            -e TRACKER_SCRIPT_NAME=gmanalytics.js \
+            gmanalytics:latest
+
+          docker network connect nginxproxymanager_npmnetwork gmanalytics
 
       - name: Seed admin user
         run: |
