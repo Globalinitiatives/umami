@@ -1,4 +1,12 @@
-import { Button, DataColumn, DataTable, type DataTableProps, Icon, Text } from '@umami/react-zen';
+import {
+  Button,
+  DataColumn,
+  DataTable,
+  type DataTableProps,
+  Icon,
+  Text,
+  useToast,
+} from '@umami/react-zen';
 import { Play, Undo2 } from 'lucide-react';
 import { DateDistance } from '@/components/common/DateDistance';
 import { useApi, useMessages, useNavigation } from '@/components/hooks';
@@ -8,15 +16,19 @@ export function SharedReplaysTable({
   websiteId,
   ...props
 }: DataTableProps & { websiteId: string }) {
-  const { t, labels } = useMessages();
+  const { t, labels, messages } = useMessages();
   const { router, updateParams } = useNavigation();
   const { del, useMutation } = useApi();
   const { touch } = useModified();
+  const { toast } = useToast();
 
   // Revoke targets a path segment, so the mutation is built per row.
   const { mutate, isPending } = useMutation({
     mutationFn: (replayId: string) => del(`/websites/${websiteId}/replays/shared/${replayId}`),
-    onSuccess: () => touch('replays'),
+    onSuccess: () => {
+      touch('replays');
+      toast(t(messages.replayRevoked));
+    },
   });
 
   return (

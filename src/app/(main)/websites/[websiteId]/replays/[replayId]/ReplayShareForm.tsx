@@ -1,10 +1,12 @@
 'use client';
 import {
   Button,
+  Column,
   Form,
   FormButtons,
   FormField,
   FormSubmitButton,
+  Label,
   Radio,
   RadioGroup,
   Text,
@@ -58,11 +60,15 @@ export function ReplayShareForm({
   if (url) {
     return (
       <Form>
-        <FormField name="link" label={t(labels.replayLink)}>
+        {/* Not a FormField: FormField clones the react-hook-form field props onto
+            its child, which overwrites the TextField's value with the (empty)
+            form value, so the copy button would copy the note field instead. */}
+        <Column gap="1">
+          <Label>{t(labels.replayLink)}</Label>
           <TextField value={url} isReadOnly allowCopy autoFocus />
-        </FormField>
+        </Column>
         <Text color="muted" size="sm">
-          {t(`message.${messages.replayShared}`)}
+          {t(messages.replayShared)}
         </Text>
         <FormButtons>
           <Button onPress={onClose}>{t(labels.close)}</Button>

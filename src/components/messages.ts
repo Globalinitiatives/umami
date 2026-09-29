@@ -450,6 +450,8 @@ export const labels: Record<string, string> = {
 export const messages: Record<string, string> = {
   error: 'message.error',
   saved: 'message.saved',
+  replayShared: 'message.replayShared',
+  replayRevoked: 'message.replayRevoked',
   noUsers: 'message.no-users',
   userDeleted: 'message.user-deleted',
   noDataAvailable: 'message.no-data-available',
