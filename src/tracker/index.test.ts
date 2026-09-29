@@ -42,15 +42,19 @@ test('identifies data-distinct-id before the initial page view', async () => {
 /**
  * UTM capture (issue #22).
  *
- * The harness disables auto-tracking so the test drives `track()` itself and
- * asserts on an exact request list, rather than racing the auto pageview.
+ * By default the harness disables auto-tracking so a test can drive `track()`
+ * itself and assert on an exact request list, rather than racing the auto
+ * pageview. A test that needs `init()` (performance, path-change hooks) opts
+ * back in via `extra`.
  */
 const setup = async (search: string, extra: Record<string, string> = {}) => {
   const script = document.createElement('script');
   script.src = 'https://analytics.example.com/gmanalytics.js';
   script.dataset.websiteId = 'website-id';
-  script.dataset.autoTrack = 'false';
-  for (const [k, v] of Object.entries(extra)) script.dataset[k] = v;
+  // `autoTrack` also gates `init()`, which is what installs the pushState hook
+  // and starts performance monitoring. Turning it off disables the very path
+  // these tests drive, so each test turns off just the pageview it doesn't want.
+  for (const [k, v] of Object.entries({ autoTrack: 'false', ...extra })) script.dataset[k] = v;
 
   Object.defineProperties(document, {
     currentScript: { configurable: true, value: script },
@@ -83,8 +87,14 @@ const setup = async (search: string, extra: Record<string, string> = {}) => {
   const bodies = () => fetchMock.mock.calls.map(([, init]) => JSON.parse(init.body));
 
   // Mirrors what an SPA does: change the query string, then notify listeners.
-  const navigate = (next: string) => {
+  // `push` drives the pushState hook, which is where the tracker flushes
+  // performance data; a real back/forward gesture only fires popstate.
+  const navigate = (next: string, push = false) => {
     currentSearch = next;
+    if (push) {
+      history.pushState({}, '', `/page${next}`);
+      return;
+    }
     window.dispatchEvent(new PopStateEvent('popstate'));
   };
 
@@ -172,4 +182,83 @@ test('nothing is written to storage', async () => {
   await tracker.track('signup');
 
   expect(setItem).not.toHaveBeenCalled();
+});
+
+test('identify() keeps the carried UTMs alongside its own data', async () => {
+  const { tracker, bodies } = await setup('?utm_source=news&utm_campaign=spring');
+
+  await tracker.identify('user-1', { plan: 'pro' });
+
+  expect(bodies()[0].payload.data).toEqual({
+    utms: { source: 'news', campaign: 'spring' },
+    plan: 'pro',
+  });
+});
+
+test('identify() keeps the carried UTMs when called with a bare id', async () => {
+  const { tracker, bodies } = await setup('?utm_source=news');
+
+  await tracker.identify('user-1');
+
+  expect(bodies()[0].payload.data).toEqual({ utms: { source: 'news' } });
+});
+
+test('identify() keeps the carried UTMs when the id is passed as an object', async () => {
+  const { tracker, bodies } = await setup('?utm_source=news');
+
+  await tracker.identify({ id: 'user-1', plan: 'pro' });
+
+  expect(bodies()[0].payload.data).toEqual({
+    utms: { source: 'news' },
+    id: 'user-1',
+    plan: 'pro',
+  });
+});
+
+test('identify() keeps the carried UTMs after SPA navigation', async () => {
+  const { tracker, bodies, navigate } = await setup('?utm_source=news&utm_campaign=spring');
+
+  await tracker.identify('user-1');
+  navigate('');
+  await tracker.identify('user-1', { plan: 'pro' });
+
+  expect(bodies()[1].payload.data).toEqual({
+    utms: { source: 'news', campaign: 'spring' },
+    plan: 'pro',
+  });
+});
+
+test('identify() without UTMs sends only its own data', async () => {
+  const { tracker, bodies } = await setup('?page=2');
+
+  await tracker.identify('user-1', { plan: 'pro' });
+
+  expect(bodies()[0].payload.data).toEqual({ plan: 'pro' });
+});
+
+test('the performance payload carries no UTM data', async () => {
+  // jsdom has no PerformanceObserver, so no metrics are recorded. The flush
+  // lives on the pushState hook, so drive that rather than popstate, and seed
+  // one metric so `sendPerformance` is not a no-op on an empty set.
+  const { tracker, bodies, navigate } = await setup('?utm_source=news&utm_campaign=spring', {
+    performance: 'true',
+    autoTrack: 'true',
+    autoPageview: 'false',
+  });
+
+  performance.getEntriesByType = vi.fn().mockReturnValue([
+    { name: 'paint', startTime: 10, duration: 5 },
+  ]) as unknown as Performance['getEntriesByType'];
+
+  // Establish the capture first. UTMs are held in memory and filled in by the
+  // first payload built, so with no prior event there is nothing to carry.
+  await tracker.track();
+
+  navigate('/next', true);
+  await vi.waitFor(() => {
+    expect(bodies().some((b: { type: string }) => b.type === 'performance')).toBe(true);
+  });
+
+  const perf = bodies().find((b: { type: string }) => b.type === 'performance');
+  expect(perf?.payload.data).toBeUndefined();
 });

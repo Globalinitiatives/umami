@@ -542,10 +542,18 @@ type MetricEntry = PerformanceEntry & {
     }
 
     cache = '';
+    const payload = getPayload();
+    const carried = carriedUtms(payload);
+    const own = typeof id === 'object' ? id : data;
+
+    // Same merge as `track(name, data)`: without it the `data` key below
+    // overwrites the one `getPayload()` set, and the identify request would
+    // carry no attribution at all. A site using `data-distinct-id` fires this
+    // before its first pageview, so the dropped UTMs are the landing campaign.
     return send(
       {
-        ...getPayload(),
-        data: typeof id === 'object' ? id : data,
+        ...payload,
+        ...(carried ? { data: { utms: carried, ...own } } : { data: own }),
       },
       'identify',
     );
@@ -692,7 +700,10 @@ type MetricEntry = PerformanceEntry & {
 
       sent = true;
       if (timeoutId) clearTimeout(timeoutId);
-      send({ ...getPayload(), ...metrics }, 'performance');
+      // Drop `data` here: the server's performance branch never reads it, so
+      // carrying the UTMs here would ship a dead field on every perf beacon.
+      const { data, ...perfPayload } = getPayload();
+      send({ ...perfPayload, ...metrics }, 'performance');
     };
 
     flushPerformance = () => {
