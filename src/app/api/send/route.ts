@@ -246,6 +246,10 @@ export async function POST(request: Request) {
       const dataUtms = (typeof data === 'object' && data !== null && 'utms' in data)
         ? (data as { utms?: Record<string, string> }).utms : undefined;
 
+      // Resolved once here and passed to saveEvent() below, so the URL and
+      // data fallbacks have a single definition. The URL wins: a tracker that
+      // carries UTMs across SPA navigations can send a stale campaign, and the
+      // page actually being viewed must take precedence over it.
       const utmSource = urlUtms.source || (dataUtms && dataUtms.source);
       const utmMedium = urlUtms.medium || (dataUtms && dataUtms.medium);
       const utmCampaign = urlUtms.campaign || (dataUtms && dataUtms.campaign);
@@ -265,11 +269,16 @@ export async function POST(request: Request) {
         // The native utm_source column already captures this — this keeps the
         // event property and the UTM column consistent.
         const utmRecord = typeof utms === 'object' && utms !== null ? utms as Record<string, unknown> : {};
+        // The URL wins over the carried data, matching the column resolution
+        // above. A tracker carrying a campaign across an SPA navigation can
+        // send a stale one, and the page actually being viewed must take
+        // precedence — otherwise the event property and the utm_* columns
+        // disagree for the same event.
         eventData = {
           ...rest,
-          source: utmRecord.source ?? rest.source,
-          medium: utmRecord.medium ?? rest.medium,
-          campaign: utmRecord.campaign ?? rest.campaign,
+          source: urlUtms.source ?? utmRecord.source ?? rest.source,
+          medium: urlUtms.medium ?? utmRecord.medium ?? rest.medium,
+          campaign: urlUtms.campaign ?? utmRecord.campaign ?? rest.campaign,
         } as Record<string, unknown>;
       }
 
@@ -351,11 +360,11 @@ export async function POST(request: Request) {
         tag,
 
         // UTM
-        utmSource: urlUtms.source || (dataUtms && dataUtms.source),
-        utmMedium: urlUtms.medium || (dataUtms && dataUtms.medium),
-        utmCampaign: urlUtms.campaign || (dataUtms && dataUtms.campaign),
-        utmContent: urlUtms.content || (dataUtms && dataUtms.content),
-        utmTerm: urlUtms.term || (dataUtms && dataUtms.term),
+        utmSource,
+        utmMedium,
+        utmCampaign,
+        utmContent,
+        utmTerm,
 
         // Click IDs
         gclid,
