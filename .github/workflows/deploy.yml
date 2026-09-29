@@ -64,11 +64,24 @@ jobs:
 
       - name: Recover failed migrations
         run: |
+          # PostgreSQL accepts TCP connections while still initialising and only
+          # then starts refusing queries with 57P03 "the database system is
+          # starting up", so a plain connect is not a readiness signal. Poll with
+          # a real query before touching the migration ledger.
+          for i in $(seq 1 30); do
+            if docker exec gmanalytics-db psql -U umami -d umami -tAc 'SELECT 1' > /dev/null 2>&1; then
+              echo "Database ready."
+              break
+            fi
+            [ "$i" = "30" ] && { echo "::error::Database never became ready"; exit 1; }
+            sleep 2
+          done
+
           # A migration that fails mid-transaction leaves a row in
           # _prisma_migrations with finished_at NULL, which makes every later
           # `migrate deploy` fail with P3009 and wedge the deploy permanently.
-          # Mark it rolled back, then drop exactly the tables that migration
-          # creates, so the corrected version can apply on this run.
+          # Mark it rolled back, then drop the tables that migration creates, so
+          # the corrected version can apply on this run.
           FAILED=$(docker exec gmanalytics-db psql -U umami -d umami -tAc \
             "SELECT migration_name FROM \"_prisma_migrations\" WHERE finished_at IS NULL AND rolled_back_at IS NULL;")
           if [ -z "$FAILED" ]; then
