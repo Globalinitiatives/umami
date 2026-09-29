@@ -32,4 +32,4 @@ CREATE INDEX "session_replay_shared_visit_id_idx" ON "session_replay_shared"("vi
 CREATE INDEX "session_replay_shared_website_id_created_at_idx" ON "session_replay_shared"("website_id", "created_at");
 
 -- AddForeignKey
-ALTER TABLE "session_replay_shared" ADD CONSTRAINT "session_replay_shared_website_id_fkey" FOREIGN KEY ("website_id") REFERENCES "website"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "session_replay_shared" ADD CONSTRAINT "session_replay_shared_website_id_fkey" FOREIGN KEY ("website_id") REFERENCES "website"("website_id") ON DELETE CASCADE ON UPDATE CASCADE;
