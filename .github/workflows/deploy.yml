@@ -62,6 +62,46 @@ jobs:
 
           docker network connect nginxproxymanager_npmnetwork gmanalytics
 
+      - name: Recover failed migrations
+        run: |
+          # A migration that fails mid-transaction leaves a row in
+          # _prisma_migrations with finished_at NULL, which makes every later
+          # `migrate deploy` fail with P3009 and wedge the deploy permanently.
+          # Mark it rolled back, then drop exactly the tables that migration
+          # creates, so the corrected version can apply on this run.
+          FAILED=$(docker exec gmanalytics-db psql -U umami -d umami -tAc \
+            "SELECT migration_name FROM \"_prisma_migrations\" WHERE finished_at IS NULL AND rolled_back_at IS NULL;")
+          if [ -z "$FAILED" ]; then
+            echo "No failed migrations to recover."
+            exit 0
+          fi
+          echo "::warning::Found failed migration(s): $FAILED - recovering"
+          docker exec gmanalytics-db psql -U umami -d umami -c \
+            "UPDATE \"_prisma_migrations\" SET rolled_back_at = NOW() WHERE finished_at IS NULL AND rolled_back_at IS NULL;"
+
+          for m in $FAILED; do
+            FILE="prisma/migrations/$m/migration.sql"
+            [ -f "$FILE" ] || { echo "  no migration file for $m, skipping"; continue; }
+            # Take the table names straight from the migration's own DDL rather
+            # than deriving them from the directory name, which does not always
+            # match (e.g. 16_boards creates "board").
+            TABLES=$(grep -oE 'CREATE TABLE (IF NOT EXISTS )?"[a-z_]+"' "$FILE" \
+              | sed -E 's/.*"([a-z_]+)".*/\1/')
+            for t in $TABLES; do
+              echo "  dropping leftover table: $t"
+              docker exec gmanalytics-db psql -U umami -d umami -c \
+                "DROP TABLE IF EXISTS \"$t\" CASCADE;" || true
+            done
+          done
+
+      - name: Apply migrations
+        run: |
+          # The app container starts before the database is ready, so its own
+          # migrate attempt is expected to fail first. Re-run it on the runner
+          # now that recovery has run and PostgreSQL is accepting queries.
+          docker exec -e DATABASE_URL="postgresql://umami:${{ secrets.POSTGRES_PASSWORD }}@gmanalytics-db:5432/umami" \
+            gmanalytics sh -c 'cd /app && node node_modules/.bin/prisma migrate deploy'
+
       - name: Seed admin user
         run: |
           sleep 10
