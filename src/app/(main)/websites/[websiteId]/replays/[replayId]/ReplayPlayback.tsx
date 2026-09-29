@@ -101,8 +101,8 @@ export function ReplayPlayback({
                         <Bookmark fill="none" />
                       </Icon>
                     </Button>
-                    <Popover side="bottom" align="end">
-                      <Dialog title={t(labels.saveReplay)} style={{ width: '300px' }}>
+                    <Popover side="bottom" align="end" className="w-96">
+                      <Dialog title={t(labels.saveReplay)}>
                         {({ close }) => (
                           <ReplaySaveForm
                             websiteId={websiteId}
@@ -124,8 +124,8 @@ export function ReplayPlayback({
                       <Share2 />
                     </Icon>
                   </Button>
-                  <Popover side="bottom" align="end">
-                    <Dialog title={t(labels.shareReplay)} style={{ width: '360px' }}>
+                  <Popover side="bottom" align="end" className="w-96">
+                    <Dialog title={t(labels.shareReplay)}>
                       {({ close }) => (
                         <ReplayShareForm
                           websiteId={websiteId}
