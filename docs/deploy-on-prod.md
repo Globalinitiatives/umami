@@ -11,6 +11,13 @@ every existing share link.
 
 ```bash
 IMAGE=ghcr.io/globalinitiatives/gmanalytics:latest
+
+# Authenticate (the package is PRIVATE — created by the workflow with
+# GITHUB_TOKEN, which defaults to private). Use a fine-grained PAT of any
+# org member, scope: read:packages. Alternatively make the package public in
+# org settings and skip this line.
+echo "<PAT-with-read:packages>" | docker login ghcr.io -u <github-username> --password-stdin
+
 docker pull "$IMAGE"
 
 docker network create gmanalytics_network || true
