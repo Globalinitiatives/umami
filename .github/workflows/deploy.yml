@@ -9,127 +9,54 @@ concurrency:
   group: deploy-${{ github.ref_name }}
   cancel-in-progress: true
 
+# Publishes the image to ghcr.io only. Running it on the production host is a
+# manual step (see docs/deploy-on-prod.md): CI never touches prod containers.
 jobs:
-  deploy:
-    runs-on: [workplanetn, gmanalytics]
+  build-and-publish:
+    name: Build image and publish to ghcr.io
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and tag image
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/globalinitiatives/gmanalytics
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix=sha-
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=ghcr-publish
+          cache-to: type=gha,scope=ghcr-publish,mode=max
+
+      - name: Published image
         run: |
-          docker build \
-            -t gmanalytics:latest \
-            -f Dockerfile \
-            .
-
-      - name: Remove old containers
-        run: |
-          docker rm -f gmanalytics || true
-          docker rm -f gmanalytics-db || true
-
-      - name: Create isolated network
-        run: docker network create gmanalytics_network || true
-
-      - name: Start PostgreSQL
-        run: |
-          docker run -d \
-            --name gmanalytics-db \
-            --network gmanalytics_network \
-            --restart always \
-            -e POSTGRES_DB=umami \
-            -e POSTGRES_USER=umami \
-            -e POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}" \
-            -v gmanalytics_db_data:/var/lib/postgresql/data \
-            postgres:15-alpine
-
-      - name: Recover failed migrations
-        run: |
-          # PostgreSQL accepts TCP connections while still initialising and only
-          # then starts refusing queries with 57P03 "the database system is
-          # starting up", so a plain connect is not a readiness signal. Poll with
-          # a real query before touching the migration ledger.
-          for i in $(seq 1 30); do
-            if docker exec gmanalytics-db psql -U umami -d umami -tAc 'SELECT 1' > /dev/null 2>&1; then
-              echo "Database ready."
-              break
-            fi
-            [ "$i" = "30" ] && { echo "::error::Database never became ready"; exit 1; }
-            sleep 2
-          done
-
-          # A migration that fails mid-transaction leaves a row in
-          # _prisma_migrations with finished_at NULL, which makes every later
-          # `migrate deploy` fail with P3009 and wedge the deploy permanently.
-          # Mark it rolled back, then drop the tables that migration creates, so
-          # the corrected version can apply on this run.
-          #
-          # This runs before the app container starts, because the app's own
-          # startup (scripts/check-db.js) applies migrations and exits non-zero
-          # on P3009; recovering first means the app applies them on its first
-          # try instead of crash-looping until its restart lands after recovery.
-          FAILED=$(docker exec gmanalytics-db psql -U umami -d umami -tAc \
-            "SELECT migration_name FROM \"_prisma_migrations\" WHERE finished_at IS NULL AND rolled_back_at IS NULL;")
-          if [ -z "$FAILED" ]; then
-            echo "No failed migrations to recover."
-            exit 0
-          fi
-          echo "::warning::Found failed migration(s): $FAILED - recovering"
-          docker exec gmanalytics-db psql -U umami -d umami -c \
-            "UPDATE \"_prisma_migrations\" SET rolled_back_at = NOW() WHERE finished_at IS NULL AND rolled_back_at IS NULL;"
-
-          for m in $FAILED; do
-            FILE="prisma/migrations/$m/migration.sql"
-            [ -f "$FILE" ] || { echo "  no migration file for $m, skipping"; continue; }
-            # Take the table names straight from the migration's own DDL rather
-            # than deriving them from the directory name, which does not always
-            # match (e.g. 16_boards creates "board").
-            TABLES=$(grep -oE 'CREATE TABLE (IF NOT EXISTS )?"[a-z_]+"' "$FILE" \
-              | sed -E 's/.*"([a-z_]+)".*/\1/')
-            for t in $TABLES; do
-              echo "  dropping leftover table: $t"
-              docker exec gmanalytics-db psql -U umami -d umami -c \
-                "DROP TABLE IF EXISTS \"$t\" CASCADE;" || true
-            done
-          done
-
-      - name: Start Umami
-        run: |
-          docker run -d \
-            --name gmanalytics \
-            --network gmanalytics_network \
-            --restart always \
-            -e DATABASE_URL="postgresql://umami:${{ secrets.POSTGRES_PASSWORD }}@gmanalytics-db:5432/umami" \
-            -e APP_SECRET="${{ secrets.APP_SECRET }}" \
-            -e TWO_FACTOR_ENCRYPTION_KEY="${{ secrets.TWO_FACTOR_ENCRYPTION_KEY }}" \
-            -e TRACKER_SCRIPT_NAME=gmanalytics.js \
-            gmanalytics:latest
-
-          docker network connect nginxproxymanager_npmnetwork gmanalytics
-
-      - name: Seed admin user
-        run: |
-          sleep 10
-          docker exec gmanalytics sh -c 'cd /app && npx ts-node scripts/seed/index.ts' || true
-
-      - name: Health check
-        run: |
-          for i in $(seq 1 30); do
-            docker exec gmanalytics curl -sf http://localhost:3000/ && exit 0
-            sleep 2
-          done
-          echo "::group::Container state"
-          docker ps -a --filter name=gmanalytics --format '{{.Names}} {{.Status}}'
-          echo "::endgroup::"
-          echo "::group::Application logs"
-          docker logs --tail 100 gmanalytics 2>&1 || true
-          echo "::endgroup::"
-          exit 1
-
-      - name: Prune old images
-        run: docker image prune -f
+          {
+            echo "### Published tags"
+            echo '```'
+            echo "${{ steps.meta.outputs.tags }}"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
